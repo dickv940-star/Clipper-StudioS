@@ -123,6 +123,182 @@
 
     <script type="module" src="js/app.js"></script>
 
+    <!-- ========================= -->
+<!-- SCREEN 3 -->
+<!-- AUTO CLIPS -->
+<!-- ========================= -->
+
+<section
+    id="autoClipScreen"
+    class="screen">
+
+    <div class="container">
+
+        <h1>
+
+            Auto Clips AI
+
+        </h1>
+
+        <p>
+
+            Atur hasil video sebelum proses AI dimulai.
+
+        </p>
+
+        <!-- Output -->
+
+        <div class="card">
+
+            <h3>Output Video</h3>
+
+            <select id="outputRatio">
+
+                <option value="youtube">
+                    YouTube (16:9)
+                </option>
+
+                <option value="tiktok">
+                    TikTok (9:16)
+                </option>
+
+                <option value="shorts">
+                    YouTube Shorts (9:16)
+                </option>
+
+                <option value="reels">
+                    Instagram Reels (9:16)
+                </option>
+
+                <option value="facebook">
+                    Facebook (1:1)
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Durasi -->
+
+        <div class="card">
+
+            <h3>Durasi</h3>
+
+            <select id="clipDuration">
+
+                <option value="20">
+                    20 Detik
+                </option>
+
+                <option value="30">
+                    30 Detik
+                </option>
+
+                <option value="60">
+                    60 Detik
+                </option>
+
+                <option value="180">
+                    3 Menit
+                </option>
+
+                <option value="300">
+                    5 Menit
+                </option>
+
+                <option value="600">
+                    10 Menit
+                </option>
+
+                <option value="1800">
+                    30 Menit
+                </option>
+
+            </select>
+
+        </div>
+
+        <!-- Effect -->
+
+        <div class="card">
+
+            <h3>Effect</h3>
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    id="effectCinematic"
+                    checked>
+
+                Cinematic
+
+            </label>
+
+        </div>
+
+        <!-- AI -->
+
+        <div class="card">
+
+            <h3>AI Features</h3>
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    id="autoFrame"
+                    checked>
+
+                Auto Frame
+
+            </label>
+
+            <label>
+
+                <input
+                    type="checkbox"
+                    id="autoSubtitle"
+                    checked>
+
+                Auto Subtitle
+
+            </label>
+
+        </div>
+
+        <!-- Subtitle -->
+
+        <div class="card">
+
+            <h3>Translate Subtitle</h3>
+
+            <select id="subtitleLanguage">
+
+                <option value="id">
+                    Indonesia
+                </option>
+
+                <option value="su">
+                    Sunda
+                </option>
+
+            </select>
+
+        </div>
+
+        <button
+            id="startAutoClip"
+            class="menuButton">
+
+            Start Auto Clips
+
+        </button>
+
+    </div>
+
+</section>
+    
 </body>
 
 </html>
