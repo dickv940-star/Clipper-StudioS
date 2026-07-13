@@ -157,15 +157,23 @@ p{
     }
 .screen{
 
-    display:none;
+    position:fixed;
+
+    top:0;
+
+    left:0;
 
     width:100%;
 
-    min-height:100vh;
+    height:100vh;
+
+    display:none;
 
     justify-content:center;
 
     align-items:center;
+
+    background:#FFD600;
 
 }
 
@@ -174,7 +182,6 @@ p{
     display:flex;
 
 }
-
 .menuButton{
 
     width:100%;
