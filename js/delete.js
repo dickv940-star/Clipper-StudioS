@@ -1,101 +1,60 @@
 /*
-=========================================
+================================
+
 ClipperStudio
-Delete Engine
-Version : 1.0
+Export Manager
 
-Clip Remove Controller
-
-=========================================
+================================
 */
 
 
-const Delete = {
+(function(){
 
 
-    selectedClip:null,
 
-
-    history:null,
-
-
-    callbacks:{},
-
-
+const ExportManager={
 
 
 
     init(){
 
+        console.log(
+            "Export Manager Ready"
+        );
 
-        this.selectedClip=null;
+    },
 
 
-        this.history=null;
+
+    async start(project){
 
 
         console.log(
-            "Delete Engine Ready"
+            "Export Start",
+            project
         );
 
 
-    },
+        return true;
+
+
+    }
 
 
 
+};
 
 
 
-
-    selectClip(
-        clip
-    ){
-
-
-        this.selectedClip =
-            clip;
-
-
-        this.emit(
-            "selected",
-            clip
-        );
-
-
-    },
+window.ExportManager=
+ExportManager;
 
 
 
+console.log(
+"Export Manager Loaded"
+);
 
 
 
-
-    execute(
-        track
-    ){
-
-
-
-        const clip =
-            this.selectedClip;
-
-
-
-        if(!clip){
-
-
-            console.error(
-                "Tidak ada clip dipilih"
-            );
-
-
-            return false;
-
-
-        }
-
-
-
-
-
-       
+})();
