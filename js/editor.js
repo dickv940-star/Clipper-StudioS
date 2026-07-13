@@ -4,15 +4,36 @@
 ClipperStudio
 Editor Controller
 
-Version : 3.1
+Version : 3.2
 
-Main Editor System
+Main Editor Singleton
 
 ================================================
 */
 
 
+(function(){
+
+"use strict";
+
+
+
+if(window.Editor){
+
+    console.warn(
+        "Editor already exists - skip duplicate"
+    );
+
+    return;
+
+}
+
+
+
+
+
 const Editor = {
+
 
 
     project:null,
@@ -30,7 +51,19 @@ const Editor = {
 
 
 
-    async init(){
+    init(){
+
+
+        if(this.ready){
+
+            console.warn(
+                "Editor already initialized"
+            );
+
+            return;
+
+        }
+
 
 
         console.log(
@@ -42,9 +75,7 @@ const Editor = {
         this.loadProject();
 
 
-
         this.connectSystems();
-
 
 
         this.bindUI();
@@ -79,15 +110,33 @@ const Editor = {
     loadProject(){
 
 
-        if(
-            window.ProjectStorage
-        ){
+
+        try{
 
 
-            this.project =
+            if(
+                window.ProjectStorage
+            ){
 
-            ProjectStorage.getCurrentProject();
 
+                this.project =
+
+                ProjectStorage.getCurrentProject();
+
+
+            }
+
+
+
+        }
+
+        catch(error){
+
+
+            console.error(
+                "Project Load Error",
+                error
+            );
 
 
         }
@@ -95,11 +144,8 @@ const Editor = {
 
 
         console.log(
-
             "Editor Project:",
-
             this.project
-
         );
 
 
@@ -118,33 +164,12 @@ const Editor = {
 
 
 
-        /*
-        ======================
-        PLAYER
-        ======================
-        */
-
-
-        if(
-            window.Player &&
-            Player.init
-        ){
-
-            Player.init();
-
-        }
+        console.log(
+            "Connecting Editor Systems..."
+        );
 
 
 
-
-
-
-
-        /*
-        ======================
-        TIMELINE
-        ======================
-        */
 
 
         if(
@@ -159,14 +184,6 @@ const Editor = {
 
 
 
-
-
-
-        /*
-        ======================
-        PLAYHEAD
-        ======================
-        */
 
 
         if(
@@ -184,37 +201,6 @@ const Editor = {
 
 
 
-
-        /*
-        ======================
-        AUDIO
-        ======================
-        */
-
-
-        if(
-            window.AudioEngine &&
-            AudioEngine.init
-        ){
-
-            AudioEngine.init();
-
-        }
-
-
-
-
-
-
-
-
-        /*
-        ======================
-        EFFECT
-        ======================
-        */
-
-
         if(
             window.EffectEngine &&
             EffectEngine.init
@@ -230,24 +216,12 @@ const Editor = {
 
 
 
-
-        /*
-        ======================
-        PREVIEW
-        ======================
-        */
-
-
         if(
-            window.RenderPreview
+            window.RenderPreview &&
+            RenderPreview.init
         ){
 
-
             RenderPreview.init();
-
-
-            RenderPreview.connectTimeline();
-
 
         }
 
@@ -257,18 +231,10 @@ const Editor = {
 
 
 
-
-        /*
-        ======================
-        RENDER PIPELINE
-        ======================
-        */
-
-
         if(
-            window.RenderPipeline
+            window.RenderPipeline &&
+            RenderPipeline.init
         ){
-
 
             RenderPipeline.init({
 
@@ -279,7 +245,6 @@ const Editor = {
                 fps:30
 
             });
-
 
         }
 
@@ -301,35 +266,37 @@ const Editor = {
 
 
 
-        const buttons = {
+        const events = {
 
 
-            playButton:
+
+            "playButton":
             ()=>this.play(),
 
 
-            pauseButton:
+
+            "pauseButton":
             ()=>this.pause(),
 
 
-            splitButton:
-            ()=>this.split(),
 
-
-            deleteButton:
-            ()=>this.delete(),
-
-
-            undoButton:
+            "undoButton":
             ()=>this.undo(),
 
 
-            redoButton:
+
+            "redoButton":
             ()=>this.redo(),
 
 
-            exportButton:
-            ()=>this.export()
+
+            "deleteButton":
+            ()=>this.delete(),
+
+
+
+            "splitButton":
+            ()=>this.split()
 
 
 
@@ -339,35 +306,31 @@ const Editor = {
 
 
 
+        Object.keys(events)
 
-        Object.keys(buttons)
-
-        .forEach(
-
-            id=>{
+        .forEach(id=>{
 
 
-                const btn =
+            const button =
 
-                document.getElementById(
-                    id
-                );
+            document.getElementById(
+                id
+            );
 
 
 
-                if(btn){
+            if(button){
 
 
-                    btn.onclick =
-                    buttons[id];
-
-
-                }
+                button.onclick =
+                events[id];
 
 
             }
 
-        );
+
+
+        });
 
 
 
@@ -384,32 +347,27 @@ const Editor = {
     play(){
 
 
-
-        this.state =
-        "playing";
-
+        this.state="playing";
 
 
 
         if(
-            window.Player
+            window.Player &&
+            Player.play
         ){
 
-
             Player.play();
-
 
         }
 
 
 
         if(
-            window.RenderPreview
+            window.RenderPreview &&
+            RenderPreview.play
         ){
 
-
             RenderPreview.play();
-
 
         }
 
@@ -433,31 +391,27 @@ const Editor = {
     pause(){
 
 
-
-        this.state =
-        "paused";
+        this.state="paused";
 
 
 
         if(
-            window.Player
+            window.Player &&
+            Player.pause
         ){
 
-
             Player.pause();
-
 
         }
 
 
 
         if(
-            window.RenderPreview
+            window.RenderPreview &&
+            RenderPreview.pause
         ){
 
-
             RenderPreview.pause();
-
 
         }
 
@@ -481,22 +435,14 @@ const Editor = {
     split(){
 
 
-
         if(
-            window.Split
+            window.Split &&
+            Split.execute
         ){
 
-
-            Split.execute();
-
+            return Split.execute();
 
         }
-
-
-
-        this.emit(
-            "split"
-        );
 
 
     },
@@ -512,17 +458,14 @@ const Editor = {
     delete(){
 
 
-
         if(
-            window.Delete
+            window.Delete &&
+            Delete.execute
         ){
 
-
-            Delete.execute();
-
+            return Delete.execute();
 
         }
-
 
 
     },
@@ -538,14 +481,12 @@ const Editor = {
     undo(){
 
 
-
         if(
-            window.Undo
+            window.Undo &&
+            Undo.execute
         ){
 
-
-            Undo.execute();
-
+            return Undo.execute();
 
         }
 
@@ -563,14 +504,12 @@ const Editor = {
     redo(){
 
 
-
         if(
-            window.Redo
+            window.Redo &&
+            Redo.execute
         ){
 
-
-            Redo.execute();
-
+            return Redo.execute();
 
         }
 
@@ -585,21 +524,18 @@ const Editor = {
 
 
 
-    addClip(
-        clip
-    ){
+    addClip(clip){
 
 
 
         if(
-            window.Timeline
+            window.Timeline &&
+            Timeline.addClip
         ){
 
 
             Timeline.addClip(
-
                 clip
-
             );
 
 
@@ -616,78 +552,17 @@ const Editor = {
 
 
 
-    setEffect(
-        effect
-    ){
+    render(){
 
 
 
         if(
-            window.EffectEngine
+            window.RenderPipeline &&
+            RenderPipeline.render
         ){
 
 
-            EffectEngine.apply(
-
-                effect
-
-            );
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async preview(){
-
-
-
-        if(
-            window.RenderPreview
-        ){
-
-
-            return RenderPreview.renderFrame();
-
-
-        }
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async render(){
-
-
-
-        this.state =
-        "rendering";
-
-
-
-
-        if(
-            window.RenderPipeline
-        ){
-
-
-            return await RenderPipeline.render();
+            return RenderPipeline.render();
 
 
         }
@@ -704,32 +579,22 @@ const Editor = {
 
 
 
-    async export(){
-
-
-
-        this.state =
-        "exporting";
-
-
+    export(){
 
 
 
         if(
-            window.ExportManager
+            window.ExportManager &&
+            ExportManager.start
         ){
 
 
-
-            return await ExportManager.start(
-
+            return ExportManager.start(
                 this.project
-
             );
 
 
         }
-
 
 
     },
@@ -746,28 +611,6 @@ const Editor = {
 
 
         return this.project;
-
-
-    },
-
-
-
-
-
-
-
-
-
-    reset(){
-
-
-        this.project=null;
-
-
-        this.ready=false;
-
-
-        this.state="idle";
 
 
     },
@@ -805,15 +648,14 @@ const Editor = {
     ){
 
 
+
         if(
             this.callbacks[event]
         ){
 
 
             this.callbacks[event](
-
                 data
-
             );
 
 
@@ -831,3 +673,13 @@ const Editor = {
 
 
 window.Editor = Editor;
+
+
+
+console.log(
+"Editor Controller Loaded"
+);
+
+
+
+})();
