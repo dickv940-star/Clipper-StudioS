@@ -163,23 +163,25 @@ const Editor = {
     connectSystems(){
 
 
+if(
+    window.Timeline
+){
 
-        console.log(
-            "Connecting Editor Systems..."
-        );
+    Timeline.on(
+        "clip-added",
+        clip=>{
 
 
+            console.log(
+                "Editor menerima clip:",
+                clip
+            );
 
-
-
-        if(
-            window.Timeline &&
-            Timeline.init
-        ){
-
-            Timeline.init();
 
         }
+    );
+
+}
 
 
 
