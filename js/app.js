@@ -145,7 +145,94 @@ startAutoClip.addEventListener("click", () => {
     alert("Tahap berikutnya: AI mulai menganalisis video.");
 
 });
+function startProcessing() {
 
+    const progressBar = document.getElementById("progressBar");
+
+    const progressText = document.getElementById("progressText");
+
+    const processTitle = document.getElementById("processTitle");
+
+    const steps = [
+
+        {
+            id: "step1",
+            text: "Membaca Video..."
+        },
+
+        {
+            id: "step2",
+            text: "Analisis Scene..."
+        },
+
+        {
+            id: "step3",
+            text: "Motion Detection..."
+        },
+
+        {
+            id: "step4",
+            text: "Highlight Detection..."
+        },
+
+        {
+            id: "step5",
+            text: "Subtitle AI..."
+        },
+
+        {
+            id: "step6",
+            text: "Rendering Timeline..."
+        }
+
+    ];
+
+    let progress = 0;
+
+    let index = 0;
+
+    const timer = setInterval(() => {
+
+        progress += 2;
+
+        progressBar.style.width = progress + "%";
+
+        progressText.textContent = progress + "%";
+
+        if (
+            index < steps.length &&
+            progress >= ((index + 1) * 100 / steps.length)
+        ) {
+
+            processTitle.textContent = steps[index].text;
+
+            const step = document.getElementById(steps[index].id);
+
+            step.innerHTML = "✅ " + step.textContent.replace("⏳ ", "");
+
+            index++;
+
+        }
+
+        if (progress >= 100) {
+
+            clearInterval(timer);
+
+            processTitle.textContent = "Analisis Selesai";
+
+            setTimeout(() => {
+
+                alert("Tahap berikutnya: Editor Auto Clip");
+
+                // showScreen("editorScreen");
+
+            }, 500);
+
+        }
+
+    }, 80);
+
+}
 // ======================================
 // Ready
 // ======================================
