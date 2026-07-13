@@ -251,7 +251,14 @@ if(
         }
 
 
+if(
+    window.Preview &&
+    Preview.init
+){
 
+    Preview.init();
+
+}
 
 
     },
