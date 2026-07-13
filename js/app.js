@@ -2,26 +2,29 @@
 ================================================
 
 ClipperStudio
-APP CORE
+Editor Controller
 
 Version : 3.0
 
-Application Bootstrap
+Main Video Editor System
 
 ================================================
 */
 
 
-const App = {
+const Editor = {
 
 
-    version:"3.0",
+    project:null,
 
 
     ready:false,
 
 
-    modules:{},
+    state:"idle",
+
+
+    callbacks:{},
 
 
 
@@ -31,15 +34,9 @@ const App = {
 
 
 
-        console.clear();
-
-
-
         console.log(
 
-            "%cClipperStudio Starting...",
-
-            "color:#6c5ce7;font-size:18px"
+            "Editor Initializing..."
 
         );
 
@@ -47,11 +44,17 @@ const App = {
 
 
 
-        this.checkModules();
+        this.loadProject();
 
 
 
-        await this.initialize();
+        this.initSystems();
+
+
+
+        this.bindUI();
+
+
 
 
 
@@ -59,12 +62,17 @@ const App = {
 
 
 
-
         console.log(
 
-            "%cClipperStudio Ready",
+            "Editor Ready"
 
-            "color:#00b894;font-size:18px"
+        );
+
+
+
+        this.emit(
+
+            "ready"
 
         );
 
@@ -80,222 +88,58 @@ const App = {
 
 
 
-    checkModules(){
+    loadProject(){
 
 
 
-        const list=[
+        if(
+            window.ProjectStorage
+        ){
 
 
 
-            // STORAGE
+            this.project =
 
-            "ProjectStorage",
+            ProjectStorage
 
+            .getCurrentProject();
 
 
-            // VIDEO
 
-            "VideoLoader",
+        }
 
 
-            "Metadata",
 
 
-            "Thumbnail",
 
+        if(
+            !this.project
+        ){
 
-            "Player",
 
 
+            console.warn(
 
+                "Project belum tersedia"
 
+            );
 
-            // AI
 
-            "SceneDetector",
+            return;
 
 
-            "MotionDetector",
 
+        }
 
-            "FaceDetector",
 
 
-            "SubtitleEngine",
 
 
-            "HighlightEngine",
+        console.log(
 
+            "Editor Project:",
 
-            "AutoFrame",
-
-
-            "ClipGenerator",
-
-
-            "AutoEditor",
-
-
-
-
-
-            // EDITOR
-
-            "Timeline",
-
-
-            "Track",
-
-
-            "Clip",
-
-
-            "Marker",
-
-
-            "Playhead",
-
-
-            "Undo",
-
-
-            "Redo",
-
-
-
-
-
-            // AUDIO
-
-            "AudioEngine",
-
-
-            "MusicManager",
-
-
-            "VoiceOver",
-
-
-            "SoundEffect",
-
-
-
-
-
-            // EFFECT
-
-            "EffectEngine",
-
-
-
-
-
-            // RENDER
-
-            "RenderEngine",
-
-
-            "PreviewRenderer",
-
-
-            "FrameRenderer",
-
-
-            "MotionEngine",
-
-
-            "ColorEngine",
-
-
-            "LUTEngine",
-
-
-            "ShaderEngine",
-
-
-            "RenderCompositor",
-
-
-            "RenderPipeline",
-
-
-
-
-
-            // EXPORT
-
-            "QualityManager",
-
-
-            "ExportManager",
-
-
-            "ExportController",
-
-
-            "RenderPreview"
-
-
-
-
-        ];
-
-
-
-
-
-        list.forEach(
-
-            module=>{
-
-
-
-                this.modules[module]=
-
-                Boolean(
-
-                    window[module]
-
-                );
-
-
-
-                if(
-                    window[module]
-                ){
-
-
-                    console.log(
-
-                        "✓",
-
-                        module
-
-                    );
-
-
-                }
-                else{
-
-
-                    console.warn(
-
-                        "○",
-
-                        module,
-
-                        "belum tersedia"
-
-                    );
-
-
-                }
-
-
-
-            }
-
+            this.project
 
         );
 
@@ -311,32 +155,29 @@ const App = {
 
 
 
-    async initialize(){
-
-
-
-        console.log(
-
-            "Initializing systems..."
-
-        );
+    initSystems(){
 
 
 
 
 
         /*
-        ===========================
-        STORAGE
-        ===========================
+        ==========================
+        PLAYER
+        ==========================
         */
 
 
-        this.initModule(
+        if(
+            window.Player
+        ){
 
-            "ProjectStorage"
 
-        );
+            Player.init();
+
+
+
+        }
 
 
 
@@ -344,17 +185,22 @@ const App = {
 
 
         /*
-        ===========================
-        VIDEO
-        ===========================
+        ==========================
+        TIMELINE
+        ==========================
         */
 
 
-        this.initModule(
+        if(
+            window.Timeline
+        ){
 
-            "Player"
 
-        );
+            Timeline.init();
+
+
+
+        }
 
 
 
@@ -362,31 +208,22 @@ const App = {
 
 
         /*
-        ===========================
-        AI
-        ===========================
+        ==========================
+        PLAYHEAD
+        ==========================
         */
 
 
-        this.initModule(
-
-            "SceneDetector"
-
-        );
+        if(
+            window.Playhead
+        ){
 
 
-        this.initModule(
-
-            "MotionDetector"
-
-        );
+            Playhead.init();
 
 
-        this.initModule(
 
-            "FaceDetector"
-
-        );
+        }
 
 
 
@@ -394,49 +231,22 @@ const App = {
 
 
         /*
-        ===========================
-        EDITOR
-        ===========================
-        */
-
-
-        this.initModule(
-
-            "Timeline"
-
-        );
-
-
-        this.initModule(
-
-            "Undo"
-
-        );
-
-
-        this.initModule(
-
-            "Redo"
-
-        );
-
-
-
-
-
-
-        /*
-        ===========================
+        ==========================
         AUDIO
-        ===========================
+        ==========================
         */
 
 
-        this.initModule(
+        if(
+            window.AudioEngine
+        ){
 
-            "AudioEngine"
 
-        );
+            AudioEngine.init();
+
+
+
+        }
 
 
 
@@ -444,17 +254,22 @@ const App = {
 
 
         /*
-        ===========================
+        ==========================
         EFFECT
-        ===========================
+        ==========================
         */
 
 
-        this.initModule(
+        if(
+            window.EffectEngine
+        ){
 
-            "EffectEngine"
 
-        );
+            EffectEngine.init();
+
+
+
+        }
 
 
 
@@ -462,46 +277,451 @@ const App = {
 
 
         /*
-        ===========================
-        RENDER
-        ===========================
+        ==========================
+        PREVIEW
+        ==========================
         */
 
 
-        this.initModule(
+        if(
+            window.PreviewRenderer
+        ){
 
-            "RenderEngine"
+
+            PreviewRenderer.init();
+
+
+
+        }
+
+
+
+
+
+
+        /*
+        ==========================
+        RENDER PIPELINE
+        ==========================
+        */
+
+
+        if(
+            window.RenderPipeline
+        ){
+
+
+
+            RenderPipeline.loadProject(
+
+                this.project
+
+            );
+
+
+
+        }
+
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    bindUI(){
+
+
+
+        const play =
+
+        document.getElementById(
+
+            "playButton"
 
         );
 
 
-        this.initModule(
 
-            "MotionEngine"
+
+
+        if(play){
+
+
+            play.onclick=()=>{
+
+                this.play();
+
+            };
+
+
+        }
+
+
+
+
+
+
+        const pause =
+
+        document.getElementById(
+
+            "pauseButton"
 
         );
 
 
-        this.initModule(
 
-            "ColorEngine"
+
+
+        if(pause){
+
+
+            pause.onclick=()=>{
+
+
+                this.pause();
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        const split =
+
+        document.getElementById(
+
+            "splitButton"
 
         );
 
 
-        this.initModule(
 
-            "LUTEngine"
+
+
+        if(split){
+
+
+            split.onclick=()=>{
+
+
+                this.split();
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        const undo =
+
+        document.getElementById(
+
+            "undoButton"
 
         );
 
 
-        this.initModule(
 
-            "ShaderEngine"
+
+
+        if(undo){
+
+
+            undo.onclick=()=>{
+
+
+                this.undo();
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        const redo =
+
+        document.getElementById(
+
+            "redoButton"
 
         );
 
+
+
+
+
+        if(redo){
+
+
+            redo.onclick=()=>{
+
+
+                this.redo();
+
+
+            };
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    play(){
+
+
+
+        this.state =
+            "playing";
+
+
+
+
+
+        if(
+            window.Player
+        ){
+
+
+
+            Player.play();
+
+
+
+        }
+
+
+
+
+
+        this.emit(
+
+            "play"
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    pause(){
+
+
+
+        this.state =
+            "paused";
+
+
+
+
+
+        if(
+            window.Player
+        ){
+
+
+
+            Player.pause();
+
+
+
+        }
+
+
+
+
+
+        this.emit(
+
+            "pause"
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    split(){
+
+
+
+        if(
+            window.Split
+        ){
+
+
+
+            Split.execute();
+
+
+
+        }
+
+
+
+
+
+        this.emit(
+
+            "split"
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    delete(){
+
+
+
+        if(
+            window.Delete
+        ){
+
+
+
+            Delete.execute();
+
+
+
+        }
+
+
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    undo(){
+
+
+
+        if(
+            window.Undo
+        ){
+
+
+
+            Undo.execute();
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    redo(){
+
+
+
+        if(
+            window.Redo
+        ){
+
+
+
+            Redo.execute();
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async preview(){
+
+
+
+        console.log(
+
+            "Generating preview..."
+
+        );
 
 
 
@@ -513,55 +733,11 @@ const App = {
 
 
 
-            RenderPipeline.init({
+            return await RenderPipeline.render();
 
-                fps:30,
-
-                width:1080,
-
-                height:1920
-
-
-            });
 
 
         }
-
-
-
-
-
-
-
-
-        /*
-        ===========================
-        EXPORT
-        ===========================
-        */
-
-
-        this.initModule(
-
-            "QualityManager"
-
-        );
-
-
-        this.initModule(
-
-            "ExportManager"
-
-        );
-
-
-        this.initModule(
-
-            "ExportController"
-
-        );
-
-
 
 
 
@@ -575,60 +751,24 @@ const App = {
 
 
 
-    initModule(
-        name
-    ){
+    async render(){
 
 
 
-        const module =
-
-        window[name];
+        this.state =
+            "rendering";
 
 
 
 
 
         if(
-            module &&
-            typeof module.init==="function"
+            window.RenderPipeline
         ){
 
 
 
-            try{
-
-
-                module.init();
-
-
-
-                console.log(
-
-                    name,
-
-                    "initialized"
-
-                );
-
-
-
-            }
-
-            catch(error){
-
-
-
-                console.error(
-
-                    name,
-
-                    error
-
-                );
-
-
-            }
+            return await RenderPipeline.render();
 
 
 
@@ -646,21 +786,117 @@ const App = {
 
 
 
-    getStatus(){
+    async export(){
 
 
 
-        return {
-
-
-            ready:this.ready,
-
-
-            modules:this.modules
+        this.state =
+            "exporting";
 
 
 
-        };
+
+
+        if(
+            window.ExportManager
+        ){
+
+
+
+            return await ExportManager.start(
+
+                this.project
+
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    setEffect(
+        effect
+    ){
+
+
+
+        if(
+            window.EffectEngine
+        ){
+
+
+
+            EffectEngine.apply(
+
+                effect
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    addClip(
+        clip
+    ){
+
+
+
+        if(
+            window.Timeline
+        ){
+
+
+
+            Timeline.addClip(
+
+                clip
+
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getProject(){
+
+
+
+        return this.project;
 
 
 
@@ -678,20 +914,71 @@ const App = {
 
 
 
+        this.project=null;
+
+
+        this.state="idle";
+
+
         this.ready=false;
 
 
 
-        console.log(
+    },
 
-            "ClipperStudio Reset"
 
-        );
+
+
+
+
+
+
+
+    on(
+        event,
+        callback
+    ){
+
+
+
+        this.callbacks[event]=callback;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    emit(
+        event,
+        data
+    ){
+
+
+
+        if(
+            this.callbacks[event]
+        ){
+
+
+            this.callbacks[event](
+
+                data
+
+            );
+
+
+        }
 
 
 
     }
-
 
 
 
@@ -702,25 +989,4 @@ const App = {
 
 
 
-
-window.App = App;
-
-
-
-
-
-
-
-document.addEventListener(
-
-"DOMContentLoaded",
-
-()=>{
-
-
-    App.init();
-
-
-}
-
-);
+window.Editor = Editor;
