@@ -6,99 +6,122 @@
     <meta charset="UTF-8">
 
     <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+          content="width=device-width, initial-scale=1.0">
 
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color"
+          content="#FFD600">
 
     <title>ClipperStudio</title>
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest"
+          href="manifest.json">
 
-    <link rel="icon" href="assets/logo.png">
-    
-    <link rel="stylesheet" href="css/style.css">
-    
-  
+    <link rel="icon"
+          href="assets/logo.png"
+          type="image/png">
+
+    <link rel="stylesheet"
+          href="css/style.css">
+
 </head>
 
 <body>
 
-<div id="homeScreen" class="screen active">
+    <div id="app">
 
-    <div class="container">
+        <!-- ========================= -->
+        <!-- SCREEN 1 -->
+        <!-- ========================= -->
 
-        <img
-            src="assets/logo.png"
-            class="logo"
-            alt="Logo">
+        <section
+            id="homeScreen"
+            class="screen active">
 
-        <h1>ClipperStudio</h1>
+            <div class="container">
 
-        <p>
+                <img
+                    src="assets/logo.png"
+                    class="logo"
+                    alt="ClipperStudio Logo">
 
-            Upload video untuk mulai membuat clip.
+                <h1>
 
-        </p>
+                    ClipperStudio
 
-        <input
-            type="file"
-            id="videoInput"
-            accept="video/*"
-            hidden>
+                </h1>
 
-        <button id="chooseFile">
+                <p>
 
-            Choose Video
+                    Upload video untuk mulai membuat clip.
 
-        </button>
+                </p>
+
+                <input
+                    type="file"
+                    id="videoInput"
+                    accept="video/*"
+                    hidden>
+
+                <button id="chooseFile">
+
+                    Choose Video
+
+                </button>
+
+            </div>
+
+        </section>
+
+        <!-- ========================= -->
+        <!-- SCREEN 2 -->
+        <!-- ========================= -->
+
+        <section
+            id="modeScreen"
+            class="screen">
+
+            <div class="container">
+
+                <img
+                    src="assets/logo.png"
+                    class="logo"
+                    alt="ClipperStudio Logo">
+
+                <h1>
+
+                    Video Loaded
+
+                </h1>
+
+                <p>
+
+                    Pilih mode pengeditan.
+
+                </p>
+
+                <button
+                    id="autoClipBtn"
+                    class="menuButton">
+
+                    Auto Clips
+
+                </button>
+
+                <button
+                    id="manualBtn"
+                    class="menuButton">
+
+                    Edit Manual
+
+                </button>
+
+            </div>
+
+        </section>
 
     </div>
 
-</div>
-
-
-<div id="modeScreen" class="screen">
-
-    <div class="container">
-
-        <img
-            src="assets/logo.png"
-            class="logo"
-            alt="Logo">
-
-        <h1>
-
-            Video Loaded
-
-        </h1>
-
-        <p>
-
-            Pilih mode pengeditan
-
-        </p>
-
-        <button
-            id="autoClipBtn"
-            class="menuButton">
-
-            Auto Clips
-
-        </button>
-
-        <button
-            id="manualBtn"
-            class="menuButton">
-
-            Edit Manual
-
-        </button>
-
-    </div>
-
-</div>
-
-<script src="js/app.js"></script>
+    <script type="module" src="js/app.js"></script>
 
 </body>
 
