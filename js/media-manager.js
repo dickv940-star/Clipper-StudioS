@@ -454,7 +454,15 @@ const MediaManager = {
             clip
         );
 
+if(
+    window.Preview
+){
 
+    Preview.load(
+        clip
+    );
+
+}
 
 
 
