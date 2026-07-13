@@ -1,129 +1,31 @@
-import Uploader from "./core/uploader.js";
-import Player from "./core/player.js";
-import Timeline from "./core/timeline.js";
-import Clips from "./core/clips.js";
+import Player from "./player/player.js";
 
-window.addEventListener("DOMContentLoaded", () => {
+import Timeline from "./editor/timeline.js";
 
-    console.log("ClipperStudio Started");
+import Uploader from "./media/uploader.js";
 
-    // ==========================
-    // Inisialisasi Modul
-    // ==========================
+import Library from "./media/library.js";
 
-    Player.init();
-    Timeline.init();
-    Uploader.init();
+window.addEventListener(
 
-    // ==========================
-    // Auto Clip
-    // ==========================
+    "DOMContentLoaded",
 
-    const autoClipBtn = document.getElementById("autoClipBtn");
+    () => {
 
-    if (autoClipBtn) {
+        console.log(
 
-        autoClipBtn.addEventListener("click", () => {
+            "ClipperStudio Started"
 
-            const duration = Player.getDuration();
+        );
 
-            if (!duration) {
+        Player.init();
 
-                alert("Upload video terlebih dahulu.");
+        Timeline.init();
 
-                return;
+        Library.init();
 
-            }
-
-            const segment = Number(
-                prompt(
-                    "Durasi setiap clip (detik)",
-                    "30"
-                )
-            );
-
-            if (!segment || segment <= 0) return;
-
-            Clips.autoClip(duration, segment);
-
-            Timeline.render();
-
-        });
+        Uploader.init();
 
     }
 
-    // ==========================
-    // Split Clip
-    // ==========================
-
-    const splitBtn = document.getElementById("splitBtn");
-
-    if (splitBtn) {
-
-        splitBtn.addEventListener("click", () => {
-
-            if (!Player.getDuration()) return;
-
-            Clips.split(
-
-                Player.getCurrentTime()
-
-            );
-
-            Timeline.render();
-
-        });
-
-    }
-
-    // ==========================
-    // Delete Clip
-    // ==========================
-
-    const deleteBtn = document.getElementById("deleteBtn");
-
-    if (deleteBtn) {
-
-        deleteBtn.addEventListener("click", () => {
-
-            if (!Clips.selected) {
-
-                alert("Pilih clip terlebih dahulu.");
-
-                return;
-
-            }
-
-            Clips.delete(
-
-                Clips.selected
-
-            );
-
-            Clips.selected = null;
-
-            Timeline.render();
-
-        });
-
-    }
-
-    // ==========================
-    // Export (sementara)
-    // ==========================
-
-    const exportBtn = document.getElementById("exportBtn");
-
-    if (exportBtn) {
-
-        exportBtn.addEventListener("click", () => {
-
-            alert(
-                "Fitur Export akan dibuat pada tahap berikutnya."
-            );
-
-        });
-
-    }
-
-});
+);
