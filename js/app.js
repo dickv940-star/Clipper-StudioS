@@ -66,31 +66,29 @@ chooseFile.addEventListener("click", () => {
 
 });
 
-videoInput.addEventListener("change", (event) => {
+videoInput.addEventListener("change", async (event) => {
 
     const file = event.target.files[0];
 
-    if (!file) {
+    if (!file) return;
 
-        return;
+    try {
+
+        const video = await VideoLoader.load(file);
+
+        window.currentVideo = video;
+
+        console.log(video);
+
+        showScreen("modeScreen");
 
     }
 
-    if (!file.type.startsWith("video/")) {
+    catch (err) {
 
-        alert("Silakan pilih file video.");
-
-        return;
+        alert(err);
 
     }
-
-    window.currentVideo = file;
-
-    console.log("Video berhasil dipilih");
-
-    console.log(file);
-
-    showScreen("modeScreen");
 
 });
 
