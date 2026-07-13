@@ -23,13 +23,14 @@
 
 <body>
 
+<div id="homeScreen" class="screen active">
+
     <div class="container">
 
         <img
             src="assets/logo.png"
-            id="logo"
             class="logo"
-            alt="Clipper Logo">
+            alt="Logo">
 
         <h1>ClipperStudio</h1>
 
@@ -42,7 +43,8 @@
         <input
             type="file"
             id="videoInput"
-            accept="video/*">
+            accept="video/*"
+            hidden>
 
         <button id="chooseFile">
 
@@ -52,41 +54,51 @@
 
     </div>
 
-<script>
+</div>
 
-const input=document.getElementById("videoInput");
 
-const button=document.getElementById("chooseFile");
+<div id="modeScreen" class="screen">
 
-button.onclick=()=>{
+    <div class="container">
 
-    input.click();
+        <img
+            src="assets/logo.png"
+            class="logo"
+            alt="Logo">
 
-};
+        <h1>
 
-input.onchange=(e)=>{
+            Video Loaded
 
-    const file=e.target.files[0];
+        </h1>
 
-    if(!file) return;
+        <p>
 
-    console.log(file);
+            Pilih mode pengeditan
 
-    // nanti masuk ke halaman editor
+        </p>
 
-};
+        <button
+            id="autoClipBtn"
+            class="menuButton">
 
-if("serviceWorker" in navigator){
+            Auto Clips
 
-    window.addEventListener("load",()=>{
+        </button>
 
-        navigator.serviceWorker.register("./sw.js");
+        <button
+            id="manualBtn"
+            class="menuButton">
 
-    });
+            Edit Manual
 
-}
+        </button>
 
-</script>
+    </div>
+
+</div>
+
+<script src="js/app.js"></script>
 
 </body>
 
