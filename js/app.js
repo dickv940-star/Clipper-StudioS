@@ -86,11 +86,7 @@ const App = {
 
 
 
-
-
         this.startRouter();
-
-
 
 
 
@@ -98,11 +94,7 @@ const App = {
 
 
 
-
-
         this.started=true;
-
-
 
 
 
@@ -117,22 +109,19 @@ const App = {
 
 
 
-
-
-
-
-
     registerModules(){
 
 
 
-       const list=[
+     const list=[
 
 "Router",
 
 "ProjectStorage",
 
 "ProjectManager",
+
+"MediaManager",
 
 "Timeline",
 
