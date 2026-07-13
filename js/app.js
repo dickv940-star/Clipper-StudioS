@@ -1,238 +1,782 @@
-// ======================================
-// ClipperStudio
-// Version 1.0
-// ======================================
+/*
+=========================================
+ClipperStudio
+Main Application Controller
+Version : 1.0
+=========================================
+*/
 
-// ---------- Screen ----------
 
-const homeScreen = document.getElementById("homeScreen");
-const modeScreen = document.getElementById("modeScreen");
-const autoClipScreen = document.getElementById("autoClipScreen");
+import "./loader.js";
+import "./metadata.js";
+import "./thumbnail.js";
+import "./player.js";
 
-// ---------- Home ----------
+import "./offline.js";
+import "./cache.js";
+import "./install.js";
 
-const chooseFile = document.getElementById("chooseFile");
-const videoInput = document.getElementById("videoInput");
+import "./ffmpeg.js";
+import "./export.js";
 
-// ---------- Mode ----------
 
-const autoClipBtn = document.getElementById("autoClipBtn");
-const manualBtn = document.getElementById("manualBtn");
+/* AI */
 
-// ---------- Auto Clip ----------
+import "./ai/scene-detector.js";
+import "./ai/motion-detector.js";
+import "./ai/face-detector.js";
+import "./ai/subtitle-engine.js";
+import "./ai/highlight-engine.js";
+import "./ai/autoframe.js";
+import "./ai/ranking.js";
+import "./ai/smart-cut.js";
+import "./ai/clip-generator.js";
 
-const startAutoClip = document.getElementById("startAutoClip");
 
-const outputRatio = document.getElementById("outputRatio");
-const clipDuration = document.getElementById("clipDuration");
+/* Editor */
 
-const effectCinematic = document.getElementById("effectCinematic");
+import "./editor/timeline.js";
+import "./editor/track.js";
+import "./editor/clip.js";
 
-const autoFrame = document.getElementById("autoFrame");
-const autoSubtitle = document.getElementById("autoSubtitle");
-const highlight = document.getElementById("highlight");
 
-const subtitleLanguage = document.getElementById("subtitleLanguage");
+/* Storage */
 
-// ======================================
-// Global
-// ======================================
+import "./storage/project-storage.js";
 
-window.currentVideo = null;
 
-// ======================================
-// Show Screen
-// ======================================
 
-function showScreen(id) {
 
-    document.querySelectorAll(".screen").forEach(screen => {
 
-        screen.classList.remove("active");
+const App = {
 
-    });
 
-    document.getElementById(id).classList.add("active");
 
-}
+    video:null,
 
-// ======================================
-// Upload Video
-// ======================================
 
-chooseFile.addEventListener("click", () => {
+    file:null,
 
-    videoInput.click();
 
-});
+    project:null,
 
-videoInput.addEventListener("change", async (event) => {
 
-    const file = event.target.files[0];
 
-    if (!file) return;
+    screens:{},
 
-    try {
 
-        const video = await VideoLoader.load(file);
 
-        window.currentVideo = video;
 
-        console.log(video);
 
-        showScreen("modeScreen");
+    async init(){
+
+
+
+        console.log(
+            "ClipperStudio Starting..."
+        );
+
+
+
+        this.cacheScreens();
+
+
+
+        this.bindUpload();
+
+
+
+        this.bindButtons();
+
+
+
+
+        await this.initializeSystems();
+
+
+
+
+        console.log(
+            "ClipperStudio Ready"
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async initializeSystems(){
+
+
+
+        try{
+
+
+
+            OfflineManager.init();
+
+
+
+            CacheManager.init();
+
+
+
+            InstallManager.init();
+
+
+
+            await ProjectStorage.init();
+
+
+
+            ClipGenerator.init();
+
+
+
+            SmartCut.init();
+
+
+
+            RankingEngine.init();
+
+
+
+
+        }
+
+        catch(error){
+
+
+            console.error(
+
+                "System Init Error",
+
+                error
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    cacheScreens(){
+
+
+
+        this.screens={
+
+
+            home:
+
+            document.getElementById(
+                "homeScreen"
+            ),
+
+
+
+            mode:
+
+            document.getElementById(
+                "modeScreen"
+            ),
+
+
+
+            auto:
+
+            document.getElementById(
+                "autoClipScreen"
+            )
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    showScreen(
+        name
+    ){
+
+
+
+        Object.values(
+            this.screens
+        )
+        .forEach(
+
+            screen=>{
+
+
+                if(screen)
+
+                    screen.classList.remove(
+                        "active"
+                    );
+
+
+            }
+
+        );
+
+
+
+
+        if(
+            this.screens[name]
+        ){
+
+
+
+            this.screens[name]
+
+            .classList.add(
+                "active"
+            );
+
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    bindUpload(){
+
+
+
+        const input =
+
+        document.getElementById(
+            "videoInput"
+        );
+
+
+
+        const button =
+
+        document.getElementById(
+            "chooseFile"
+        );
+
+
+
+
+        if(!input || !button)
+            return;
+
+
+
+
+
+        button.onclick=()=>{
+
+
+            input.click();
+
+
+
+        };
+
+
+
+
+
+
+
+        input.onchange=
+
+        async(e)=>{
+
+
+
+            const file =
+            e.target.files[0];
+
+
+
+            if(!file)
+                return;
+
+
+
+
+            console.log(
+
+                "Video dipilih",
+
+                file
+
+            );
+
+
+
+            this.file=file;
+
+
+
+            await this.loadVideo(
+                file
+            );
+
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async loadVideo(
+        file
+    ){
+
+
+
+        try{
+
+
+
+            this.showScreen(
+                "mode"
+            );
+
+
+
+
+
+            this.project =
+
+            ProjectStorage.create(
+
+                file.name
+
+            );
+
+
+
+
+
+            this.project.video={
+
+
+                name:file.name,
+
+
+                size:file.size,
+
+
+                type:file.type
+
+
+
+            };
+
+
+
+
+
+            await ProjectStorage.save(
+
+                this.project
+
+            );
+
+
+
+
+
+            CacheManager.saveVideoMeta({
+
+                name:file.name,
+
+                size:file.size,
+
+                type:file.type
+
+
+            });
+
+
+
+
+
+            console.log(
+
+                "Video berhasil dimuat"
+
+            );
+
+
+
+        }
+
+
+        catch(error){
+
+
+
+            console.error(
+
+                "Load video error",
+
+                error
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    bindButtons(){
+
+
+
+        const auto =
+
+        document.getElementById(
+
+            "autoClipBtn"
+
+        );
+
+
+
+
+        if(auto){
+
+
+
+            auto.onclick=()=>{
+
+
+                this.showScreen(
+                    "auto"
+                );
+
+
+            };
+
+
+        }
+
+
+
+
+
+
+        const manual =
+
+        document.getElementById(
+
+            "manualBtn"
+
+        );
+
+
+
+        if(manual){
+
+
+
+            manual.onclick=()=>{
+
+
+                console.log(
+
+                    "Open Manual Editor"
+
+                );
+
+
+
+            };
+
+
+        }
+
+
+
+
+
+        const startAuto =
+
+        document.getElementById(
+
+            "startAutoClip"
+
+        );
+
+
+
+
+        if(startAuto){
+
+
+
+            startAuto.onclick=
+
+            ()=>{
+
+
+                this.startAutoClip();
+
+
+            };
+
+
+
+        }
+
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async startAutoClip(){
+
+
+
+        console.log(
+
+            "AI Auto Clip Started"
+
+        );
+
+
+
+
+        this.showProcessing();
+
+
+
+        /*
+
+        Pipeline:
+
+        Video
+        |
+        Scene
+        |
+        Motion
+        |
+        Face
+        |
+        Highlight
+        |
+        Ranking
+        |
+        Smart Cut
+        |
+        Clip Generator
+
+        */
+
+
+
+
+
+        try{
+
+
+
+            const result = {
+
+
+                video:
+                this.file,
+
+
+
+                scenes:[],
+
+
+                motions:[],
+
+
+                faces:[],
+
+
+                highlights:[]
+
+
+            };
+
+
+
+
+
+            RankingEngine.rank(
+
+                []
+
+            );
+
+
+
+
+            const clips =
+
+            ClipGenerator.generate(
+
+                []
+
+            );
+
+
+
+
+            this.project.clips =
+                clips;
+
+
+
+            await ProjectStorage.save(
+
+                this.project
+
+            );
+
+
+
+
+
+            console.log(
+
+                "AI Clip selesai",
+
+                clips
+
+            );
+
+
+
+        }
+
+
+        catch(error){
+
+
+
+            console.error(
+
+                error
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    showProcessing(){
+
+
+
+        console.log(
+
+            "Processing AI..."
+
+        );
+
+
 
     }
 
-    catch (err) {
 
-        alert(err);
 
-    }
+};
 
-});
 
-// ======================================
-// Mode
-// ======================================
 
-autoClipBtn.addEventListener("click", () => {
 
-    showScreen("autoClipScreen");
 
-});
+window.App =
+    App;
 
-manualBtn.addEventListener("click", () => {
 
-    alert("Editor Manual akan dibuat pada tahap berikutnya.");
 
-});
+document.addEventListener(
 
-// ======================================
-// Start Auto Clip
-// ======================================
+"DOMContentLoaded",
 
-startAutoClip.addEventListener("click", () => {
+()=>{
 
-    const settings = {
 
-        video: window.currentVideo,
+    App.init();
 
-        output: outputRatio.value,
 
-        duration: clipDuration.value,
-
-        cinematic: effectCinematic.checked,
-
-        autoFrame: autoFrame.checked,
-
-        autoSubtitle: autoSubtitle.checked,
-
-        highlight: highlight.checked,
-
-        subtitleLanguage: subtitleLanguage.value
-
-    };
-
-    console.clear();
-
-    console.log("========== AUTO CLIP ==========");
-
-    console.log(settings);
-
-    alert("Tahap berikutnya: AI mulai menganalisis video.");
-
-});
-function startProcessing() {
-
-    const progressBar = document.getElementById("progressBar");
-
-    const progressText = document.getElementById("progressText");
-
-    const processTitle = document.getElementById("processTitle");
-
-    const steps = [
-
-        {
-            id: "step1",
-            text: "Membaca Video..."
-        },
-
-        {
-            id: "step2",
-            text: "Analisis Scene..."
-        },
-
-        {
-            id: "step3",
-            text: "Motion Detection..."
-        },
-
-        {
-            id: "step4",
-            text: "Highlight Detection..."
-        },
-
-        {
-            id: "step5",
-            text: "Subtitle AI..."
-        },
-
-        {
-            id: "step6",
-            text: "Rendering Timeline..."
-        }
-
-    ];
-
-    let progress = 0;
-
-    let index = 0;
-
-    const timer = setInterval(() => {
-
-        progress += 2;
-
-        progressBar.style.width = progress + "%";
-
-        progressText.textContent = progress + "%";
-
-        if (
-            index < steps.length &&
-            progress >= ((index + 1) * 100 / steps.length)
-        ) {
-
-            processTitle.textContent = steps[index].text;
-
-            const step = document.getElementById(steps[index].id);
-
-            step.innerHTML = "✅ " + step.textContent.replace("⏳ ", "");
-
-            index++;
-
-        }
-
-        if (progress >= 100) {
-
-            clearInterval(timer);
-
-            processTitle.textContent = "Analisis Selesai";
-
-            setTimeout(() => {
-
-                alert("Tahap berikutnya: Editor Auto Clip");
-
-                // showScreen("editorScreen");
-
-            }, 500);
-
-        }
-
-    }, 80);
-
-}
-// ======================================
-// Ready
-// ======================================
-
-console.log("ClipperStudio Ready");
+});                                   
