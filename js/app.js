@@ -126,38 +126,29 @@ const App = {
 
 
 
-        const list=[
+       const list=[
 
+"Router",
 
-            "Router",
+"ProjectStorage",
 
+"ProjectManager",
 
-            "ProjectStorage",
+"Timeline",
 
+"Editor",
 
-            "Timeline",
+"RenderPipeline",
 
+"RenderPreview",
 
-            "Editor",
+"EffectEngine",
 
+"AudioEngine",
 
-            "RenderPipeline",
+"ExportManager"
 
-
-            "RenderPreview",
-
-
-            "EffectEngine",
-
-
-            "AudioEngine",
-
-
-            "ExportManager"
-
-
-
-        ];
+];
 
 
 
