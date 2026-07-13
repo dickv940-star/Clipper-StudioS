@@ -27,278 +27,365 @@
 
 <body>
 
-    <div id="app">
+<div id="app">
 
-        <!-- ========================= -->
-        <!-- SCREEN 1 -->
-        <!-- ========================= -->
+    <!-- ================================= -->
+    <!-- SCREEN 1 -->
+    <!-- HOME -->
+    <!-- ================================= -->
 
-        <section
-            id="homeScreen"
-            class="screen active">
+    <section
+        id="homeScreen"
+        class="screen active">
 
-            <div class="container">
+        <div class="container">
 
-                <img
-                    src="assets/logo.png"
-                    class="logo"
-                    alt="ClipperStudio Logo">
+            <img
+                src="assets/logo.png"
+                class="logo"
+                alt="ClipperStudio">
 
-                <h1>
+            <h1>
 
-                    ClipperStudio
+                ClipperStudio
 
-                </h1>
+            </h1>
 
-                <p>
+            <p>
 
-                    Upload video untuk mulai membuat clip.
+                Upload video untuk mulai membuat clip.
 
-                </p>
+            </p>
 
-                <input
-                    type="file"
-                    id="videoInput"
-                    accept="video/*"
-                    hidden>
+            <input
+                type="file"
+                id="videoInput"
+                accept="video/*"
+                hidden>
 
-                <button id="chooseFile">
+            <button
+                id="chooseFile"
+                class="menuButton">
 
-                    Choose Video
+                Choose Video
 
-                </button>
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================= -->
+    <!-- SCREEN 2 -->
+    <!-- PILIH MODE -->
+    <!-- ================================= -->
+
+    <section
+        id="modeScreen"
+        class="screen">
+
+        <div class="container">
+
+            <img
+                src="assets/logo.png"
+                class="logo"
+                alt="ClipperStudio">
+
+            <h1>
+
+                Video Loaded
+
+            </h1>
+
+            <p>
+
+                Pilih mode pengeditan.
+
+            </p>
+
+            <button
+                id="autoClipBtn"
+                class="menuButton">
+
+                Auto Clips
+
+            </button>
+
+            <button
+                id="manualBtn"
+                class="menuButton">
+
+                Edit Manual
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ================================= -->
+    <!-- SCREEN 3 -->
+    <!-- AUTO CLIPS -->
+    <!-- ================================= -->
+
+    <section
+        id="autoClipScreen"
+        class="screen">
+
+        <div class="container">
+
+            <h1>
+
+                Auto Clips AI
+
+            </h1>
+
+            <p>
+
+                Atur hasil video sebelum proses AI dimulai.
+
+            </p>
+
+
+
+            <!-- OUTPUT -->
+
+            <div class="card">
+
+                <h2>
+
+                    Output Video
+
+                </h2>
+
+                <select id="outputRatio">
+
+                    <option value="youtube">
+
+                        YouTube 16:9
+
+                    </option>
+
+                    <option value="tiktok">
+
+                        TikTok 9:16
+
+                    </option>
+
+                    <option value="shorts">
+
+                        YouTube Shorts
+
+                    </option>
+
+                    <option value="reels">
+
+                        Instagram Reels
+
+                    </option>
+
+                    <option value="facebook">
+
+                        Facebook Feed
+
+                    </option>
+
+                </select>
 
             </div>
 
-        </section>
 
-        <!-- ========================= -->
-        <!-- SCREEN 2 -->
-        <!-- ========================= -->
 
-        <section
-            id="modeScreen"
-            class="screen">
+            <!-- DURASI -->
 
-            <div class="container">
+            <div class="card">
 
-                <img
-                    src="assets/logo.png"
-                    class="logo"
-                    alt="ClipperStudio Logo">
+                <h2>
 
-                <h1>
+                    Durasi Clip
 
-                    Video Loaded
+                </h2>
 
-                </h1>
+                <select id="clipDuration">
 
-                <p>
+                    <option value="20">
 
-                    Pilih mode pengeditan.
+                        20 Detik
 
-                </p>
+                    </option>
 
-                <button
-                    id="autoClipBtn"
-                    class="menuButton">
+                    <option value="30">
 
-                    Auto Clips
+                        30 Detik
 
-                </button>
+                    </option>
 
-                <button
-                    id="manualBtn"
-                    class="menuButton">
+                    <option value="60">
 
-                    Edit Manual
+                        60 Detik
 
-                </button>
+                    </option>
+
+                    <option value="180">
+
+                        3 Menit
+
+                    </option>
+
+                    <option value="300">
+
+                        5 Menit
+
+                    </option>
+
+                    <option value="600">
+
+                        10 Menit
+
+                    </option>
+
+                    <option value="1800">
+
+                        30 Menit
+
+                    </option>
+
+                </select>
 
             </div>
 
-        </section>
 
-    </div>
 
-    <script type="module" src="js/app.js"></script>
+            <!-- EFFECT -->
 
-    <!-- ========================= -->
-<!-- SCREEN 3 -->
-<!-- AUTO CLIPS -->
-<!-- ========================= -->
+            <div class="card">
 
-<section
-    id="autoClipScreen"
-    class="screen">
+                <h2>
 
-    <div class="container">
+                    Effect
 
-        <h1>
+                </h2>
 
-            Auto Clips AI
+                <label>
 
-        </h1>
+                    <input
+                        type="checkbox"
+                        id="effectCinematic"
+                        checked>
 
-        <p>
+                    Cinematic
 
-            Atur hasil video sebelum proses AI dimulai.
+                </label>
 
-        </p>
+            </div>
 
-        <!-- Output -->
 
-        <div class="card">
 
-            <h3>Output Video</h3>
+            <!-- AI -->
 
-            <select id="outputRatio">
+            <div class="card">
 
-                <option value="youtube">
-                    YouTube (16:9)
-                </option>
+                <h2>
 
-                <option value="tiktok">
-                    TikTok (9:16)
-                </option>
+                    AI Features
 
-                <option value="shorts">
-                    YouTube Shorts (9:16)
-                </option>
+                </h2>
 
-                <option value="reels">
-                    Instagram Reels (9:16)
-                </option>
+                <label>
 
-                <option value="facebook">
-                    Facebook (1:1)
-                </option>
+                    <input
+                        type="checkbox"
+                        id="autoFrame"
+                        checked>
 
-            </select>
+                    Auto Frame
 
-        </div>
+                </label>
 
-        <!-- Durasi -->
+                <label>
 
-        <div class="card">
+                    <input
+                        type="checkbox"
+                        id="autoSubtitle"
+                        checked>
 
-            <h3>Durasi</h3>
+                    Auto Subtitle
 
-            <select id="clipDuration">
+                </label>
 
-                <option value="20">
-                    20 Detik
-                </option>
+                <label>
 
-                <option value="30">
-                    30 Detik
-                </option>
+                    <input
+                        type="checkbox"
+                        id="highlight"
+                        checked>
 
-                <option value="60">
-                    60 Detik
-                </option>
+                    Highlight Detection
 
-                <option value="180">
-                    3 Menit
-                </option>
+                </label>
 
-                <option value="300">
-                    5 Menit
-                </option>
+            </div>
 
-                <option value="600">
-                    10 Menit
-                </option>
 
-                <option value="1800">
-                    30 Menit
-                </option>
 
-            </select>
+            <!-- SUBTITLE -->
 
-        </div>
+            <div class="card">
 
-        <!-- Effect -->
+                <h2>
 
-        <div class="card">
+                    Subtitle Language
 
-            <h3>Effect</h3>
+                </h2>
 
-            <label>
+                <select id="subtitleLanguage">
 
-                <input
-                    type="checkbox"
-                    id="effectCinematic"
-                    checked>
+                    <option value="id">
 
-                Cinematic
+                        Indonesia
 
-            </label>
+                    </option>
 
-        </div>
+                    <option value="su">
 
-        <!-- AI -->
+                        Sunda
 
-        <div class="card">
+                    </option>
 
-            <h3>AI Features</h3>
+                    <option value="en">
 
-            <label>
+                        English
 
-                <input
-                    type="checkbox"
-                    id="autoFrame"
-                    checked>
+                    </option>
 
-                Auto Frame
+                </select>
 
-            </label>
+            </div>
 
-            <label>
 
-                <input
-                    type="checkbox"
-                    id="autoSubtitle"
-                    checked>
 
-                Auto Subtitle
+            <button
+                id="startAutoClip"
+                class="menuButton">
 
-            </label>
+                Start Auto Clips
+
+            </button>
 
         </div>
 
-        <!-- Subtitle -->
+    </section>
 
-        <div class="card">
+</div>
 
-            <h3>Translate Subtitle</h3>
+<script
+    type="module"
+    src="js/app.js"></script>
 
-            <select id="subtitleLanguage">
-
-                <option value="id">
-                    Indonesia
-                </option>
-
-                <option value="su">
-                    Sunda
-                </option>
-
-            </select>
-
-        </div>
-
-        <button
-            id="startAutoClip"
-            class="menuButton">
-
-            Start Auto Clips
-
-        </button>
-
-    </div>
-
-</section>
-    
 </body>
 
 </html>
