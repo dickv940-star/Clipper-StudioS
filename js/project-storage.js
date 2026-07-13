@@ -1,173 +1,60 @@
 /*
-=========================================
+================================================
+
 ClipperStudio
-Project Storage
-Version : 1.0
+Project Storage Manager
 
-IndexedDB Project Manager
+Version : 3.2
 
-=========================================
+Local Project Database
+
+================================================
 */
+
+
+(function(){
+
+"use strict";
+
+
+
+if(window.ProjectStorage){
+
+    console.warn(
+        "ProjectStorage already loaded"
+    );
+
+    return;
+
+}
+
+
+
 
 
 const ProjectStorage = {
 
 
-    db:null,
 
+    key:
 
-    dbName:
-    "ClipperStudioDB",
+    "clipperstudio_projects",
 
 
-    storeName:
-    "projects",
 
+    currentKey:
 
-    version:1,
+    "clipperstudio_current_project",
 
 
-    current:null,
 
 
-    callbacks:{},
 
+    init(){
 
 
-
-
-    async init(){
-
-
-        return new Promise(
-
-            (resolve,reject)=>{
-
-
-                const request =
-
-                indexedDB.open(
-
-                    this.dbName,
-
-                    this.version
-
-                );
-
-
-
-
-
-                request.onupgradeneeded =
-
-                (event)=>{
-
-
-                    const db =
-                    event.target.result;
-
-
-
-                    if(
-                        !db.objectStoreNames
-                        .contains(
-                            this.storeName
-                        )
-                    ){
-
-
-
-                        const store =
-
-                        db.createObjectStore(
-
-                            this.storeName,
-
-                            {
-
-                                keyPath:
-                                "id"
-
-                            }
-
-                        );
-
-
-
-                        store.createIndex(
-
-                            "name",
-
-                            "name",
-
-                            {
-
-                                unique:false
-
-                            }
-
-                        );
-
-
-
-                    }
-
-
-                };
-
-
-
-
-
-
-                request.onsuccess =
-
-                (event)=>{
-
-
-                    this.db =
-                    event.target.result;
-
-
-
-                    console.log(
-
-                        "Project Storage Ready"
-
-                    );
-
-
-
-                    resolve();
-
-
-
-                };
-
-
-
-
-
-
-                request.onerror =
-
-                (error)=>{
-
-
-                    console.error(
-                        error
-                    );
-
-
-                    reject(error);
-
-
-                };
-
-
-
-            }
-
+        console.log(
+            "ProjectStorage Ready"
         );
 
 
@@ -179,13 +66,12 @@ const ProjectStorage = {
 
 
 
-    create(
-        name="Untitled Project"
-    ){
 
 
+    createProject(data={}){
 
-        const project={
+
+        const project = {
 
 
             id:
@@ -198,9 +84,9 @@ const ProjectStorage = {
 
             name:
 
+            data.name ||
 
-
-            name,
+            "Untitled Project",
 
 
 
@@ -216,11 +102,11 @@ const ProjectStorage = {
 
 
 
-            video:null,
+            timeline:{
 
+                tracks:[]
 
-
-            metadata:{},
+            },
 
 
 
@@ -228,34 +114,13 @@ const ProjectStorage = {
 
 
 
-            timeline:[],
-
-
-
-            subtitle:[],
-
-
-
-            audio:{
-
-
-                music:[],
-
-
-                voice:[],
-
-
-                effects:[]
-
-
-            },
-
-
-
             settings:{
 
 
-                ratio:"16:9",
+                width:1080,
+
+
+                height:1920,
 
 
                 fps:30
@@ -270,12 +135,20 @@ const ProjectStorage = {
 
 
 
-        this.current =
-            project;
+        this.saveProject(project);
+
+
+
+        this.setCurrentProject(
+
+            project
+
+        );
 
 
 
         return project;
+
 
 
     },
@@ -286,404 +159,361 @@ const ProjectStorage = {
 
 
 
-    async save(
-        project
-    ){
+
+
+    saveProject(project){
 
 
 
-        if(
-            !this.db
-        )
-            await this.init();
+        if(!project){
 
+            return false;
 
+        }
 
 
 
         project.updated =
-            Date.now();
+
+        Date.now();
 
 
 
 
+        let projects =
 
-        return new Promise(
-
-            (resolve,reject)=>{
-
-
-
-                const tx =
-
-                this.db.transaction(
-
-                    this.storeName,
-
-                    "readwrite"
-
-                );
-
-
-
-                tx.objectStore(
-                    this.storeName
-                )
-                .put(
-                    project
-                );
+        this.getProjects();
 
 
 
 
+        const index =
 
-                tx.oncomplete =
+        projects.findIndex(
 
-                ()=>{
-
-
-                    this.current =
-                    project;
-
-
-
-                    this.emit(
-
-                        "saved",
-
-                        project
-
-                    );
-
-
-
-                    resolve(
-                        project
-                    );
-
-
-                };
-
-
-
-
-
-                tx.onerror = reject;
-
-
-
-            }
+            p=>p.id===project.id
 
         );
 
 
-    },
 
 
+        if(index>=0){
 
 
+            projects[index]=project;
 
 
+        }
 
-    async load(
-        id
-    ){
+        else{
 
 
-
-        return new Promise(
-
-            (resolve,reject)=>{
-
-
-
-                const tx =
-
-                this.db.transaction(
-
-                    this.storeName,
-
-                    "readonly"
-
-                );
-
-
-
-                const request =
-
-                tx.objectStore(
-
-                    this.storeName
-
-                )
-                .get(
-                    id
-                );
-
-
-
-
-
-                request.onsuccess=
-
-                ()=>{
-
-
-                    this.current =
-
-                    request.result;
-
-
-
-                    resolve(
-
-                        request.result
-
-                    );
-
-
-                };
-
-
-
-
-
-                request.onerror =
-                reject;
-
-
-
-            }
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    async list(){
-
-
-
-        return new Promise(
-
-            (resolve)=>{
-
-
-                const tx =
-
-                this.db.transaction(
-
-                    this.storeName,
-
-                    "readonly"
-
-                );
-
-
-
-                const request =
-
-                tx.objectStore(
-
-                    this.storeName
-
-                )
-                .getAll();
-
-
-
-
-
-                request.onsuccess=
-
-                ()=>{
-
-
-                    resolve(
-
-                        request.result
-
-                    );
-
-
-                };
-
-
-
-            }
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    async remove(
-        id
-    ){
-
-
-
-        const tx =
-
-        this.db.transaction(
-
-            this.storeName,
-
-            "readwrite"
-
-        );
-
-
-
-        tx.objectStore(
-
-            this.storeName
-
-        )
-        .delete(
-            id
-        );
-
-
-
-        this.emit(
-
-            "deleted",
-
-            id
-
-        );
-
-
-    },
-
-
-
-
-
-
-
-    rename(
-        project,
-        name
-    ){
-
-
-
-        project.name =
-            name;
-
-
-
-        return project;
-
-
-    },
-
-
-
-
-
-
-
-    getCurrent(){
-
-
-
-        return this.current;
-
-
-    },
-
-
-
-
-
-
-
-    autosave(){
-
-
-
-        if(
-            !this.current
-        )
-            return;
-
-
-
-        this.save(
-
-            this.current
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-    on(
-        event,
-        callback
-    ){
-
-
-
-        this.callbacks[event]=
-            callback;
-
-
-
-    },
-
-
-
-
-
-
-
-    emit(
-        event,
-        data
-    ){
-
-
-
-        if(
-            this.callbacks[event]
-        ){
-
-
-            this.callbacks[event](
-                data
-            );
+            projects.push(project);
 
 
         }
 
 
 
+
+        localStorage.setItem(
+
+            this.key,
+
+            JSON.stringify(projects)
+
+        );
+
+
+
+
+        return true;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getProjects(){
+
+
+
+        const data =
+
+        localStorage.getItem(
+
+            this.key
+
+        );
+
+
+
+        if(!data){
+
+
+            return [];
+
+
+        }
+
+
+
+        try{
+
+
+            return JSON.parse(data);
+
+
+        }
+
+        catch(error){
+
+
+            console.error(
+
+                "Project database error",
+
+                error
+
+            );
+
+
+            return [];
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    setCurrentProject(project){
+
+
+
+        if(!project){
+
+            return;
+
+        }
+
+
+
+        localStorage.setItem(
+
+            this.currentKey,
+
+            JSON.stringify(project)
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getCurrentProject(){
+
+
+
+        const data =
+
+        localStorage.getItem(
+
+            this.currentKey
+
+        );
+
+
+
+        if(!data){
+
+
+
+            return null;
+
+
+
+        }
+
+
+
+        try{
+
+
+            return JSON.parse(data);
+
+
+
+        }
+
+        catch(error){
+
+
+            console.error(
+
+                "Current project error",
+
+                error
+
+            );
+
+
+            return null;
+
+
+        }
+
+
+    },
+
+
+
+
+
+
+
+
+
+    updateCurrentProject(data){
+
+
+
+        const project =
+
+        this.getCurrentProject();
+
+
+
+        if(!project){
+
+
+            return false;
+
+
+        }
+
+
+
+        Object.assign(
+
+            project,
+
+            data
+
+        );
+
+
+
+        this.setCurrentProject(
+
+            project
+
+        );
+
+
+
+        this.saveProject(
+
+            project
+
+        );
+
+
+
+        return true;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    deleteProject(id){
+
+
+
+        let projects =
+
+        this.getProjects();
+
+
+
+        projects =
+
+        projects.filter(
+
+            p=>p.id!==id
+
+        );
+
+
+
+        localStorage.setItem(
+
+            this.key,
+
+            JSON.stringify(projects)
+
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    clear(){
+
+
+        localStorage.removeItem(
+
+            this.key
+
+        );
+
+
+        localStorage.removeItem(
+
+            this.currentKey
+
+        );
+
+
     }
-
-
 
 
 
@@ -691,5 +521,17 @@ const ProjectStorage = {
 
 
 
-window.ProjectStorage =
-    ProjectStorage;
+
+
+
+window.ProjectStorage = ProjectStorage;
+
+
+
+console.log(
+"ProjectStorage Loaded"
+);
+
+
+
+})();
