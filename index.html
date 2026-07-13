@@ -6,151 +6,186 @@
     <meta charset="UTF-8">
 
     <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+        content="width=device-width, initial-scale=1.0">
+
+    <meta name="theme-color" content="#0f172a">
 
     <title>ClipperStudio</title>
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="manifest" href="manifest.json">
+
+    <link rel="icon" href="assets/logo.png">
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
+        body{
+
+            background:#0f172a;
+
+            color:#ffffff;
+
+            font-family:Arial,Helvetica,sans-serif;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            min-height:100vh;
+
+        }
+
+        .container{
+
+            width:100%;
+
+            max-width:420px;
+
+            padding:30px;
+
+            text-align:center;
+
+        }
+
+        .logo{
+
+            width:180px;
+
+            height:180px;
+
+            object-fit:contain;
+
+            margin-bottom:30px;
+
+        }
+
+        h1{
+
+            font-size:30px;
+
+            margin-bottom:10px;
+
+        }
+
+        p{
+
+            color:#94a3b8;
+
+            margin-bottom:35px;
+
+        }
+
+        #videoInput{
+
+            display:none;
+
+        }
+
+        #chooseFile{
+
+            width:100%;
+
+            padding:16px;
+
+            border:none;
+
+            border-radius:12px;
+
+            background:#2563eb;
+
+            color:white;
+
+            font-size:16px;
+
+            cursor:pointer;
+
+            transition:.25s;
+
+        }
+
+        #chooseFile:hover{
+
+            background:#1d4ed8;
+
+        }
+
+    </style>
 
 </head>
 
 <body>
 
-    <!-- ========================= -->
-    <!-- HEADER -->
-    <!-- ========================= -->
+    <div class="container">
 
-    <header>
+        <img
+            src="assets/logo.png"
+            id="logo"
+            class="logo"
+            alt="Clipper Logo">
 
-        <div class="logo">
-
-            <h2>🎬 ClipperStudio</h2>
-
-        </div>
-
-        <div class="toolbar">
-
-            <button id="chooseVideo">
-                Upload Video
-            </button>
-
-            <button id="autoClipBtn">
-                Auto Clip
-            </button>
-
-            <button id="splitBtn">
-                Split
-            </button>
-
-            <button id="deleteBtn">
-                Delete
-            </button>
-
-            <button id="exportBtn">
-                Export
-            </button>
-
-        </div>
-
-    </header>
-
-    <!-- ========================= -->
-    <!-- MAIN -->
-    <!-- ========================= -->
-
-    <main>
-
-        <!-- Upload Area -->
-
-        <section id="uploadArea">
-
-            <input
-                type="file"
-                id="videoInput"
-                accept="video/*"
-                hidden>
-
-            <h2>Upload Video</h2>
-
-            <p>
-
-                Klik tombol Upload Video
-                atau drag & drop file video.
-
-            </p>
-
-        </section>
-
-        <!-- Preview -->
-
-        <section id="previewArea">
-
-            <video
-
-                id="video"
-
-                controls
-
-                preload="metadata"
-
-            ></video>
-
-        </section>
-
-        <!-- Timeline -->
-
-        <section id="timelinePanel">
-
-            <div id="timelineToolbar">
-
-                <button id="zoomOut">−</button>
-
-                <span id="zoomLabel">
-
-                    100%
-
-                </span>
-
-                <button id="zoomIn">+</button>
-
-            </div>
-
-            <div id="timelineWrapper">
-
-                <canvas
-                    id="timelineCanvas">
-                </canvas>
-
-                <div id="playhead"></div>
-
-            </div>
-
-        </section>
-
-    </main>
-
-    <!-- ========================= -->
-    <!-- FOOTER -->
-    <!-- ========================= -->
-
-    <footer>
+        <h1>ClipperStudio</h1>
 
         <p>
 
-            ClipperStudio V1
+            Upload video untuk mulai membuat clip.
 
         </p>
 
-    </footer>
+        <input
+            type="file"
+            id="videoInput"
+            accept="video/*">
 
-    <!-- ========================= -->
-    <!-- APP -->
-    <!-- ========================= -->
+        <button id="chooseFile">
 
-    <script
-        type="module"
-        src="js/app.js">
-    </script>
+            Choose Video
+
+        </button>
+
+    </div>
+
+<script>
+
+const input=document.getElementById("videoInput");
+
+const button=document.getElementById("chooseFile");
+
+button.onclick=()=>{
+
+    input.click();
+
+};
+
+input.onchange=(e)=>{
+
+    const file=e.target.files[0];
+
+    if(!file) return;
+
+    console.log(file);
+
+    // nanti masuk ke halaman editor
+
+};
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener("load",()=>{
+
+        navigator.serviceWorker.register("./sw.js");
+
+    });
+
+}
+
+</script>
 
 </body>
 
