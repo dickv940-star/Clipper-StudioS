@@ -253,17 +253,11 @@ const Split = {
     },
 
 
-
-
-
-
-
     replace(
         track,
         oldClip,
         newClips
     ){
-
 
 
         const index =
@@ -272,17 +266,248 @@ const Split = {
             );
 
 
-
         if(
             index === -1
         ){
 
-            return;
+            return false;
 
         }
 
 
 
+        track.clips.splice(
+
+            index,
+
+            1,
+
+            ...newClips
+
+        );
 
 
-        track.clips.splice
+
+        this.emit(
+
+            "replaced",
+
+            {
+
+                oldClip,
+
+                newClips
+
+            }
+
+        );
+
+
+
+        return true;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    splitTrack(
+        track,
+        time
+    ){
+
+
+        if(
+            !track ||
+            !track.clips
+        ){
+
+            return [];
+
+        }
+
+
+
+        let result=[];
+
+
+
+        track.clips.forEach(
+
+            clip=>{
+
+
+                if(
+
+                    time > clip.start &&
+
+                    time < clip.end
+
+                ){
+
+
+
+                    const parts =
+
+                    this.createParts(
+
+                        clip,
+
+                        time
+
+                    );
+
+
+
+                    this.replace(
+
+                        track,
+
+                        clip,
+
+                        parts
+
+                    );
+
+
+
+                    result.push(
+
+                        ...parts
+
+                    );
+
+
+
+                }
+
+
+
+            }
+
+        );
+
+
+
+        return result;
+
+
+    },
+
+
+
+
+
+    createParts(
+        clip,
+        time
+    ){
+
+
+        return [
+
+            this.createPart(
+
+                clip,
+
+                clip.start,
+
+                time
+
+            ),
+
+
+            this.createPart(
+
+                clip,
+
+                time,
+
+                clip.end
+
+            )
+
+
+        ];
+
+
+    },
+
+
+
+
+
+    undo(){
+
+        console.log(
+
+            "Split undo"
+
+        );
+
+    },
+
+
+
+
+
+
+
+
+
+    on(
+        event,
+        callback
+    ){
+
+        this.callbacks[event]=callback;
+
+
+    },
+
+
+
+
+
+
+
+
+
+    emit(
+        event,
+        data
+    ){
+
+
+        if(
+            this.callbacks[event]
+        ){
+
+            this.callbacks[event](
+
+                data
+
+            );
+
+        }
+
+
+    }
+
+
+
+};
+
+
+
+
+
+
+
+window.Split = Split;
