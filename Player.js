@@ -1,44 +1,133 @@
 import Timeline from "./timeline.js";
+import Clips from "./clips.js";
 
-const Player={
+const Player = {
 
-video:null,
+    video: null,
 
-init(){
+    currentFile: null,
 
-    this.video=document.getElementById("video");
+    init() {
 
-    this.video.addEventListener("loadedmetadata",()=>{
+        this.video = document.getElementById("video");
 
-        Timeline.setDuration(
-            this.video.duration
-        );
+        if (!this.video) {
+            console.error("Video element tidak ditemukan.");
+            return;
+        }
 
-    });
+        // Video selesai dimuat
+        this.video.addEventListener("loadedmetadata", () => {
 
-    this.video.addEventListener("timeupdate",()=>{
+            console.log("Video Loaded");
 
-        const playhead=document.getElementById("playhead");
+            console.log("Nama :", this.currentFile?.name);
 
-        if(!Timeline.duration) return;
+            console.log("Durasi :", this.video.duration);
 
-        const x=(this.video.currentTime/Timeline.duration)
-            *Timeline.canvas.width;
+            console.log(
+                "Resolusi :",
+                this.video.videoWidth + " x " + this.video.videoHeight
+            );
 
-        playhead.style.left=x+"px";
+            // Membuat 1 clip penuh
+            Clips.create(this.video.duration);
 
-    });
+            // Menggambar timeline
+            Timeline.setDuration(this.video.duration);
 
-},
+        });
 
-load(file){
+        // Update playhead
+        this.video.addEventListener("timeupdate", () => {
 
-    this.video.src=
-        URL.createObjectURL(file);
+            if (!Timeline.duration) return;
 
-    this.video.load();
+            const playhead = document.getElementById("playhead");
 
-}
+            if (!playhead) return;
+
+            const x =
+                (this.video.currentTime / Timeline.duration) *
+                Timeline.canvas.width;
+
+            playhead.style.left = x + "px";
+
+        });
+
+        // Video selesai diputar
+        this.video.addEventListener("ended", () => {
+
+            console.log("Playback selesai");
+
+        });
+
+    },
+
+    load(file) {
+
+        if (!file) return;
+
+        this.currentFile = file;
+
+        // Hapus object URL sebelumnya
+        if (this.video.src) {
+            URL.revokeObjectURL(this.video.src);
+        }
+
+        const url = URL.createObjectURL(file);
+
+        this.video.src = url;
+
+        this.video.load();
+
+    },
+
+    play() {
+
+        this.video.play();
+
+    },
+
+    pause() {
+
+        this.video.pause();
+
+    },
+
+    toggle() {
+
+        if (this.video.paused) {
+
+            this.video.play();
+
+        } else {
+
+            this.video.pause();
+
+        }
+
+    },
+
+    seek(seconds) {
+
+        if (!this.video) return;
+
+        this.video.currentTime = seconds;
+
+    },
+
+    getCurrentTime() {
+
+        return this.video.currentTime;
+
+    },
+
+    getDuration() {
+
+        return this.video.duration;
+
+    }
 
 };
 
