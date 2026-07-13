@@ -1,62 +1,78 @@
 /*
-=========================================
+================================================
+
 ClipperStudio
 Timeline Engine
-Version : 1.0
 
-Main timeline controller
+Version : 3.2
 
-Video
-Audio
-Subtitle
-Effect Track
+Video Timeline Controller
 
-=========================================
+================================================
 */
+
+
+(function(){
+
+"use strict";
+
+
+
+if(window.Timeline){
+
+    console.warn(
+        "Timeline already loaded"
+    );
+
+    return;
+
+}
+
+
+
 
 
 const Timeline = {
 
 
-    duration:0,
-
-
-    zoom:1,
-
-
-    width:1000,
-
 
     tracks:[],
 
 
-    playhead:0,
+    duration:0,
 
 
     callbacks:{},
 
 
+    initialized:false,
 
 
 
-    init(options={}){
 
 
-        this.width =
-            options.width ||
-            1000;
 
 
-        this.zoom =
-            options.zoom ||
-            1;
+
+
+    init(){
+
+
+        if(this.initialized){
+
+            return;
+
+        }
 
 
 
         this.tracks=[];
 
 
-        this.playhead=0;
+        this.duration=0;
+
+
+        this.initialized=true;
 
 
 
@@ -65,46 +81,6 @@ const Timeline = {
         );
 
 
-    },
-
-
-
-
-
-
-
-    load(videoData){
-
-
-
-        if(!videoData){
-
-            console.error(
-                "Video tidak tersedia"
-            );
-
-            return;
-
-        }
-
-
-
-        this.duration =
-            videoData.duration;
-
-
-
-        console.log(
-            "Timeline Loaded:",
-            this.duration
-        );
-
-
-        this.emit(
-            "loaded",
-            this.duration
-        );
-
 
     },
 
@@ -114,9 +90,35 @@ const Timeline = {
 
 
 
-    addTrack(
-        track
+
+
+    createTrack(
+        type="video"
     ){
+
+
+
+        const track={
+
+
+
+            id:
+
+            "track_" +
+
+            Date.now(),
+
+
+
+            type:type,
+
+
+
+            clips:[]
+
+
+
+        };
 
 
 
@@ -126,34 +128,13 @@ const Timeline = {
 
 
 
-        this.emit(
-            "track-added",
-            track
-        );
+        return track;
+
 
 
     },
 
 
-
-
-
-
-
-    removeTrack(
-        id
-    ){
-
-
-
-        this.tracks =
-            this.tracks.filter(
-                item =>
-                item.id !== id
-            );
-
-
-    },
 
 
 
@@ -162,28 +143,49 @@ const Timeline = {
 
 
     addClip(
-        trackId,
         clip
     ){
 
 
 
-        const track =
-            this.getTrack(
-                trackId
-            );
+        if(!clip){
+
+            return null;
+
+        }
+
+
+
+
+
+
+        let track =
+
+        this.tracks.find(
+
+            t=>t.type==="video"
+
+        );
+
+
+
 
 
 
         if(!track){
 
-            console.error(
-                "Track tidak ditemukan"
+
+            track=
+
+            this.createTrack(
+                "video"
             );
 
-            return;
 
         }
+
+
+
 
 
 
@@ -193,13 +195,45 @@ const Timeline = {
 
 
 
+
+
+
+        this.calculateDuration();
+
+
+
+
+
+
         this.emit(
+
             "clip-added",
+
             clip
+
         );
 
 
+
+
+
+        console.log(
+
+            "Timeline Clip Added",
+
+            clip
+
+        );
+
+
+
+        return clip;
+
+
+
     },
+
+
 
 
 
@@ -208,50 +242,61 @@ const Timeline = {
 
 
     removeClip(
-        trackId,
-        clipId
+        clip
     ){
 
 
 
-        const track =
-            this.getTrack(
-                trackId
-            );
+        this.tracks.forEach(
+
+            track=>{
+
+
+                const index=
+
+                track.clips.indexOf(
+                    clip
+                );
 
 
 
-        if(!track)
-            return;
+                if(index!==-1){
 
 
+                    track.clips.splice(
 
-        track.clips =
-            track.clips.filter(
-                clip =>
-                clip.id !== clipId
-            );
+                        index,
 
+                        1
 
-    },
+                    );
 
 
+                }
 
 
+            }
 
-
-
-    getTrack(
-        id
-    ){
-
-
-        return this.tracks.find(
-            track =>
-            track.id === id
         );
 
 
+
+
+
+        this.calculateDuration();
+
+
+
+        this.emit(
+
+            "clip-removed",
+
+            clip
+
+        );
+
+
+
     },
 
 
@@ -260,40 +305,31 @@ const Timeline = {
 
 
 
-    setPlayhead(
+
+
+    splitClip(
+        clip,
         time
     ){
 
 
 
         if(
-            time < 0
+            !window.Split
         ){
 
-            time=0;
+            return;
 
         }
 
 
 
-        if(
-            time > this.duration
-        ){
-
-            time =
-            this.duration;
-
-        }
+        Split.selectClip(
+            clip
+        );
 
 
-
-        this.playhead =
-            time;
-
-
-
-        this.emit(
-            "playhead",
+        return Split.execute(
             time
         );
 
@@ -307,10 +343,36 @@ const Timeline = {
 
 
 
-    getPlayhead(){
 
 
-        return this.playhead;
+    getClips(){
+
+
+
+        let result=[];
+
+
+
+        this.tracks.forEach(
+
+            track=>{
+
+
+                result.push(
+
+                    ...track.clips
+
+                );
+
+
+            }
+
+        );
+
+
+
+        return result;
+
 
 
     },
@@ -321,79 +383,86 @@ const Timeline = {
 
 
 
-    timeToPixel(
+
+
+    calculateDuration(){
+
+
+
+        let max=0;
+
+
+
+        this.getClips()
+
+        .forEach(
+
+            clip=>{
+
+
+                if(
+                    clip.end > max
+                ){
+
+                    max=clip.end;
+
+                }
+
+
+            }
+
+        );
+
+
+
+        this.duration=max;
+
+
+
+        return max;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    seek(
         time
     ){
 
 
 
-        return (
-
-            time /
-            this.duration
-
-        )
-        *
-        this.width
-        *
-        this.zoom;
+        if(
+            window.Playhead
+        ){
 
 
-
-    },
-
-
-
-
-
-
-
-    pixelToTime(
-        pixel
-    ){
-
-
-
-        return (
-
-            pixel /
-            (
-                this.width *
-                this.zoom
-            )
-
-        )
-        *
-        this.duration;
-
-
-
-    },
-
-
-
-
-
-
-
-    setZoom(
-        value
-    ){
-
-
-
-        this.zoom =
-            Math.max(
-                0.1,
-                value
+            Playhead.set(
+                time
             );
+
+
+        }
+
+
 
 
 
         this.emit(
-            "zoom",
-            this.zoom
+
+            "seek",
+
+            time
+
         );
+
 
 
     },
@@ -404,19 +473,102 @@ const Timeline = {
 
 
 
-    getVisibleRange(){
 
+
+    play(){
+
+
+
+        if(
+            window.RenderPreview
+        ){
+
+
+            RenderPreview.play();
+
+
+        }
+
+
+
+        this.emit(
+            "play"
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    pause(){
+
+
+
+        if(
+            window.RenderPreview
+        ){
+
+
+            RenderPreview.pause();
+
+
+        }
+
+
+
+        this.emit(
+            "pause"
+        );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    clear(){
+
+
+        this.tracks=[];
+
+
+        this.duration=0;
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getState(){
 
 
         return {
 
 
-            start:0,
+            tracks:this.tracks,
 
 
-            end:
-            this.duration
-
+            duration:this.duration
 
 
         };
@@ -430,19 +582,20 @@ const Timeline = {
 
 
 
+
+
     on(
         event,
         callback
     ){
 
 
-
-        this.callbacks[event] =
-            callback;
-
+        this.callbacks[event]=callback;
 
 
     },
+
+
 
 
 
@@ -456,20 +609,19 @@ const Timeline = {
     ){
 
 
-
         if(
             this.callbacks[event]
         ){
 
-            this.callbacks[event](
-                data
-            );
+
+            this.callbacks[event](data);
 
         }
 
 
-
     }
+
+
 
 
 
@@ -479,5 +631,16 @@ const Timeline = {
 
 
 
+
 window.Timeline =
-    Timeline;
+Timeline;
+
+
+
+console.log(
+"Timeline Engine Loaded"
+);
+
+
+
+})();
