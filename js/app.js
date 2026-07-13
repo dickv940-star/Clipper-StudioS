@@ -1,30 +1,37 @@
 /*
 ================================================
 
-ClipperStudio
-Editor Controller
+ClipperStudio AI Editor
 
-Version : 3.0
+Application Bootstrap
 
-Main Video Editor System
+Version : 3.2
 
 ================================================
 */
 
 
-const Editor = {
+(function(){
+
+"use strict";
 
 
-    project:null,
 
 
-    ready:false,
+
+const App = {
 
 
-    state:"idle",
+
+    version:"3.2",
 
 
-    callbacks:{},
+    modules:{},
+
+
+    started:false,
+
+
 
 
 
@@ -34,101 +41,14 @@ const Editor = {
 
 
 
-        console.log(
-
-            "Editor Initializing..."
-
-        );
-
-
-
-
-
-        this.loadProject();
-
-
-
-        this.initSystems();
-
-
-
-        this.bindUI();
-
-
-
-
-
-        this.ready=true;
-
-
-
-        console.log(
-
-            "Editor Ready"
-
-        );
-
-
-
-        this.emit(
-
-            "ready"
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    loadProject(){
-
-
-
-        if(
-            window.ProjectStorage
-        ){
-
-
-
-            this.project =
-
-            ProjectStorage
-
-            .getCurrentProject();
-
-
-
-        }
-
-
-
-
-
-        if(
-            !this.project
-        ){
-
-
+        if(this.started){
 
             console.warn(
-
-                "Project belum tersedia"
-
+                "ClipperStudio already started"
             );
-
 
             return;
 
-
-
         }
 
 
@@ -136,611 +56,163 @@ const Editor = {
 
 
         console.log(
-
-            "Editor Project:",
-
-            this.project
-
+            "================================"
         );
 
-
-
-    },
-
-
-
-
-
-
-
-
-
-    initSystems(){
-
-
-
-
-
-        /*
-        ==========================
-        PLAYER
-        ==========================
-        */
-
-
-        if(
-            window.Player
-        ){
-
-
-            Player.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        TIMELINE
-        ==========================
-        */
-
-
-        if(
-            window.Timeline
-        ){
-
-
-            Timeline.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        PLAYHEAD
-        ==========================
-        */
-
-
-        if(
-            window.Playhead
-        ){
-
-
-            Playhead.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        AUDIO
-        ==========================
-        */
-
-
-        if(
-            window.AudioEngine
-        ){
-
-
-            AudioEngine.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        EFFECT
-        ==========================
-        */
-
-
-        if(
-            window.EffectEngine
-        ){
-
-
-            EffectEngine.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        PREVIEW
-        ==========================
-        */
-
-
-        if(
-            window.PreviewRenderer
-        ){
-
-
-            PreviewRenderer.init();
-
-
-
-        }
-
-
-
-
-
-
-        /*
-        ==========================
-        RENDER PIPELINE
-        ==========================
-        */
-
-
-        if(
-            window.RenderPipeline
-        ){
-
-
-
-            RenderPipeline.loadProject(
-
-                this.project
-
-            );
-
-
-
-        }
-
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    bindUI(){
-
-
-
-        const play =
-
-        document.getElementById(
-
-            "playButton"
-
+        console.log(
+            "ClipperStudio Starting..."
+        );
+
+        console.log(
+            "Version:",
+            this.version
+        );
+
+        console.log(
+            "================================"
         );
 
 
 
 
 
-        if(play){
+        this.registerModules();
 
 
-            play.onclick=()=>{
 
-                this.play();
 
-            };
 
+        await this.waitModules();
 
-        }
 
 
 
 
+        this.startRouter();
 
 
-        const pause =
 
-        document.getElementById(
 
-            "pauseButton"
 
-        );
+        this.startEditor();
 
 
 
 
 
-        if(pause){
+        this.started=true;
 
 
-            pause.onclick=()=>{
-
-
-                this.pause();
-
-
-            };
-
-
-        }
-
-
-
-
-
-
-        const split =
-
-        document.getElementById(
-
-            "splitButton"
-
-        );
-
-
-
-
-
-        if(split){
-
-
-            split.onclick=()=>{
-
-
-                this.split();
-
-
-            };
-
-
-        }
-
-
-
-
-
-
-        const undo =
-
-        document.getElementById(
-
-            "undoButton"
-
-        );
-
-
-
-
-
-        if(undo){
-
-
-            undo.onclick=()=>{
-
-
-                this.undo();
-
-
-            };
-
-
-        }
-
-
-
-
-
-
-        const redo =
-
-        document.getElementById(
-
-            "redoButton"
-
-        );
-
-
-
-
-
-        if(redo){
-
-
-            redo.onclick=()=>{
-
-
-                this.redo();
-
-
-            };
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    play(){
-
-
-
-        this.state =
-            "playing";
-
-
-
-
-
-        if(
-            window.Player
-        ){
-
-
-
-            Player.play();
-
-
-
-        }
-
-
-
-
-
-        this.emit(
-
-            "play"
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    pause(){
-
-
-
-        this.state =
-            "paused";
-
-
-
-
-
-        if(
-            window.Player
-        ){
-
-
-
-            Player.pause();
-
-
-
-        }
-
-
-
-
-
-        this.emit(
-
-            "pause"
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    split(){
-
-
-
-        if(
-            window.Split
-        ){
-
-
-
-            Split.execute();
-
-
-
-        }
-
-
-
-
-
-        this.emit(
-
-            "split"
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    delete(){
-
-
-
-        if(
-            window.Delete
-        ){
-
-
-
-            Delete.execute();
-
-
-
-        }
-
-
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    undo(){
-
-
-
-        if(
-            window.Undo
-        ){
-
-
-
-            Undo.execute();
-
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    redo(){
-
-
-
-        if(
-            window.Redo
-        ){
-
-
-
-            Redo.execute();
-
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async preview(){
 
 
 
         console.log(
+            "ClipperStudio Ready"
+        );
 
-            "Generating preview..."
+
+
+    },
+
+
+
+
+
+
+
+
+
+    registerModules(){
+
+
+
+        const list=[
+
+
+            "Router",
+
+
+            "ProjectStorage",
+
+
+            "Timeline",
+
+
+            "Editor",
+
+
+            "RenderPipeline",
+
+
+            "RenderPreview",
+
+
+            "EffectEngine",
+
+
+            "AudioEngine",
+
+
+            "ExportManager"
+
+
+
+        ];
+
+
+
+
+
+
+        list.forEach(
+
+            name=>{
+
+
+                this.modules[name]=
+
+                window[name] || null;
+
+
+
+                if(
+                    this.modules[name]
+                ){
+
+
+                    console.log(
+
+                        name,
+
+                        "Loaded"
+
+                    );
+
+
+                }
+
+                else{
+
+
+                    console.warn(
+
+                        name,
+
+                        "Not Found"
+
+                    );
+
+
+                }
+
+
+
+            }
 
         );
 
 
 
-
-
-        if(
-            window.RenderPipeline
-        ){
-
-
-
-            return await RenderPipeline.render();
-
-
-
-        }
-
-
-
     },
 
 
@@ -751,67 +223,43 @@ const Editor = {
 
 
 
-    async render(){
+    async waitModules(){
 
 
 
-        this.state =
-            "rendering";
+        let retry=0;
 
 
 
+        while(
 
+            !window.Editor &&
 
-        if(
-            window.RenderPipeline
+            retry < 20
+
         ){
 
 
+            await new Promise(
 
-            return await RenderPipeline.render();
+                resolve=>
 
+                setTimeout(
 
+                    resolve,
 
-        }
+                    100
 
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async export(){
-
-
-
-        this.state =
-            "exporting";
-
-
-
-
-
-        if(
-            window.ExportManager
-        ){
-
-
-
-            return await ExportManager.start(
-
-                this.project
+                )
 
             );
 
 
+            retry++;
+
 
         }
+
 
 
 
@@ -825,21 +273,27 @@ const Editor = {
 
 
 
-    setEffect(
-        effect
-    ){
+    startRouter(){
 
 
 
         if(
-            window.EffectEngine
+
+            window.Router &&
+
+            Router.init
+
         ){
 
 
 
-            EffectEngine.apply(
+            Router.init();
 
-                effect
+
+
+            console.log(
+
+                "Router Started"
 
             );
 
@@ -858,127 +312,96 @@ const Editor = {
 
 
 
-    addClip(
-        clip
-    ){
+    startEditor(){
 
 
 
         if(
-            window.Timeline
+
+            window.Editor &&
+
+            Editor.init
+
         ){
 
 
 
-            Timeline.addClip(
+            Editor.init();
 
-                clip
 
-            );
 
+            console.log(
 
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    getProject(){
-
-
-
-        return this.project;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    reset(){
-
-
-
-        this.project=null;
-
-
-        this.state="idle";
-
-
-        this.ready=false;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    on(
-        event,
-        callback
-    ){
-
-
-
-        this.callbacks[event]=callback;
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    emit(
-        event,
-        data
-    ){
-
-
-
-        if(
-            this.callbacks[event]
-        ){
-
-
-            this.callbacks[event](
-
-                data
+                "Editor Started"
 
             );
 
 
         }
+
+        else{
+
+
+            console.error(
+
+                "Editor module missing"
+
+            );
+
+
+        }
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    getModule(name){
+
+
+        return this.modules[name];
+
+
+    },
+
+
+
+
+
+
+
+
+
+    status(){
+
+
+
+        return {
+
+
+            version:this.version,
+
+
+            started:this.started,
+
+
+            modules:this.modules
+
+
+
+        };
 
 
 
     }
+
 
 
 
@@ -989,4 +412,32 @@ const Editor = {
 
 
 
-window.Editor = Editor;
+
+window.App = App;
+
+
+
+
+
+
+window.addEventListener(
+
+"DOMContentLoaded",
+
+()=>{
+
+
+    App.init();
+
+
+
+}
+
+);
+
+
+
+
+
+
+})();
