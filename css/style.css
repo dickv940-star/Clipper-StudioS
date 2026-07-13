@@ -213,4 +213,69 @@ p{
     transform:translateY(-2px);
 
 }
+   .processing{
+
+    max-width:550px;
+
+}
+
+.progressBox{
+
+    width:100%;
+
+    height:18px;
+
+    background:#e6e6e6;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    margin:25px 0;
+
+}
+
+.progressBar{
+
+    width:0%;
+
+    height:100%;
+
+    background:#111;
+
+    transition:width .35s ease;
+
+}
+
+#progressText{
+
+    margin-bottom:30px;
+
+    font-size:28px;
+
+}
+
+.stepList{
+
+    text-align:left;
+
+    margin:30px 0;
+
+}
+
+.step{
+
+    background:#fff;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    margin-bottom:10px;
+
+    font-size:15px;
+
+    color:#111;
+
+}
 }
