@@ -1,37 +1,112 @@
+// =======================================
+// ClipperStudio
+// Version : V1
+// =======================================
+
+const homeScreen = document.getElementById("homeScreen");
+const modeScreen = document.getElementById("modeScreen");
+
 const chooseFile = document.getElementById("chooseFile");
-const input = document.getElementById("videoInput");
+const videoInput = document.getElementById("videoInput");
 
-const home = document.getElementById("homeScreen");
-const mode = document.getElementById("modeScreen");
+const autoClipBtn = document.getElementById("autoClipBtn");
+const manualBtn = document.getElementById("manualBtn");
 
-chooseFile.onclick = () => {
+// =======================================
+// Menyimpan video yang dipilih
+// =======================================
 
-    input.click();
+window.currentVideo = null;
 
-};
+// =======================================
+// Ganti Screen
+// =======================================
 
-input.onchange = (e) => {
+function showScreen(screenId) {
 
-    const file = e.target.files[0];
+    document.querySelectorAll(".screen").forEach(screen => {
 
-    if (!file) return;
+        screen.classList.remove("active");
+
+    });
+
+    document.getElementById(screenId).classList.add("active");
+
+}
+
+// =======================================
+// Upload Video
+// =======================================
+
+chooseFile.addEventListener("click", () => {
+
+    videoInput.click();
+
+});
+
+// =======================================
+// Setelah video dipilih
+// =======================================
+
+videoInput.addEventListener("change", (event) => {
+
+    const file = event.target.files[0];
+
+    if (!file) {
+
+        return;
+
+    }
+
+    // Pastikan file adalah video
+    if (!file.type.startsWith("video/")) {
+
+        alert("Silakan pilih file video.");
+
+        return;
+
+    }
+
+    // Simpan video sementara
+    window.currentVideo = file;
+
+    console.log("Video dipilih:");
 
     console.log(file);
 
-    home.classList.remove("active");
+    // Pindah ke Screen Mode
+    showScreen("modeScreen");
 
-    mode.classList.add("active");
+});
 
-};
+// =======================================
+// Auto Clips
+// =======================================
 
-document.getElementById("autoClipBtn").onclick = () => {
+autoClipBtn.addEventListener("click", () => {
 
-    console.log("Auto Clips");
+    console.log("Mode Auto Clips");
 
-};
+    // Tahap berikutnya:
+    // buka halaman Auto Clip
 
-document.getElementById("manualBtn").onclick = () => {
+});
 
-    console.log("Edit Manual");
+// =======================================
+// Edit Manual
+// =======================================
 
-};
+manualBtn.addEventListener("click", () => {
+
+    console.log("Mode Edit Manual");
+
+    // Tahap berikutnya:
+    // buka halaman Editor
+
+});
+
+// =======================================
+// Aplikasi Siap
+// =======================================
+
+console.log("ClipperStudio Ready");
