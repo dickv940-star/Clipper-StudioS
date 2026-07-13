@@ -118,6 +118,7 @@ render(){
             this.format(i),
             x+2,
             15
+           import Clips from "./clips.js"; 
         );
 
     }
