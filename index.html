@@ -3,194 +3,154 @@
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<title>ClipperStudio</title>
+    <title>ClipperStudio</title>
 
-<link
-rel="stylesheet"
-href="css/style.css">
+    <link rel="stylesheet" href="css/style.css">
 
 </head>
 
 <body>
 
-<header>
+    <!-- ========================= -->
+    <!-- HEADER -->
+    <!-- ========================= -->
 
-<h1>ClipperStudio</h1>
+    <header>
 
-<div class="toolbar">
+        <div class="logo">
 
-<button id="uploadBtn">
-Upload
-</button>
+            <h2>🎬 ClipperStudio</h2>
 
-<button id="autoClipBtn">
-Auto Clip
-</button>
+        </div>
 
-<button id="exportBtn">
-Export
-</button>
+        <div class="toolbar">
 
-</div>
+            <button id="chooseVideo">
+                Upload Video
+            </button>
 
-</header>
+            <button id="autoClipBtn">
+                Auto Clip
+            </button>
 
-<main>
+            <button id="splitBtn">
+                Split
+            </button>
 
-<section id="uploadArea">
+            <button id="deleteBtn">
+                Delete
+            </button>
 
-<input
-type="file"
-id="videoInput"
-accept="video/*"
-hidden>
+            <button id="exportBtn">
+                Export
+            </button>
 
-<button id="chooseVideo">
+        </div>
 
-Pilih Video
+    </header>
 
-</button>
+    <!-- ========================= -->
+    <!-- MAIN -->
+    <!-- ========================= -->
 
-<p>
+    <main>
 
-atau drag & drop video
+        <!-- Upload Area -->
 
-</p>
+        <section id="uploadArea">
 
-</section>
+            <input
+                type="file"
+                id="videoInput"
+                accept="video/*"
+                hidden>
 
-<section id="previewArea">
+            <h2>Upload Video</h2>
 
-<video
-id="video"
-controls>
-</video>
+            <p>
 
-</section>
+                Klik tombol Upload Video
+                atau drag & drop file video.
 
-<section id="timelinePanel">
+            </p>
 
-    <div id="timelineToolbar">
+        </section>
 
-        <button id="zoomOut">-</button>
+        <!-- Preview -->
 
-        <span id="zoomLabel">100%</span>
+        <section id="previewArea">
 
-        <button id="zoomIn">+</button>
+            <video
 
-    </div>
+                id="video"
 
-    <div id="timelineWrapper">
+                controls
 
-        <canvas id="timelineCanvas"></canvas>
+                preload="metadata"
 
-        <div id="playhead"></div>
+            ></video>
 
-    </div>
+        </section>
 
-</section>
+        <!-- Timeline -->
 
-</main>
+        <section id="timelinePanel">
 
-<script
-type="module"
-src="js/app.js">
-</script>
+            <div id="timelineToolbar">
 
-</body>
+                <button id="zoomOut">−</button>
 
-</html><!DOCTYPE html>
-<html lang="id">
+                <span id="zoomLabel">
 
-<head>
+                    100%
 
-<meta charset="UTF-8">
+                </span>
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0">
+                <button id="zoomIn">+</button>
 
-<title>ClipperStudio</title>
+            </div>
 
-<link
-rel="stylesheet"
-href="css/style.css">
+            <div id="timelineWrapper">
 
-</head>
+                <canvas
+                    id="timelineCanvas">
+                </canvas>
 
-<body>
+                <div id="playhead"></div>
 
-<header>
+            </div>
 
-<h1>ClipperStudio</h1>
+        </section>
 
-<div class="toolbar">
+    </main>
 
-<button id="uploadBtn">
-Upload
-</button>
+    <!-- ========================= -->
+    <!-- FOOTER -->
+    <!-- ========================= -->
 
-<button id="autoClipBtn">
-Auto Clip
-</button>
+    <footer>
 
-<button id="exportBtn">
-Export
-</button>
+        <p>
 
-</div>
+            ClipperStudio V1
 
-</header>
+        </p>
 
-<main>
+    </footer>
 
-<section id="uploadArea">
+    <!-- ========================= -->
+    <!-- APP -->
+    <!-- ========================= -->
 
-<input
-type="file"
-id="videoInput"
-accept="video/*"
-hidden>
-
-<button id="chooseVideo">
-
-Pilih Video
-
-</button>
-
-<p>
-
-atau drag & drop video
-
-</p>
-
-</section>
-
-<section id="previewArea">
-
-<video
-id="video"
-controls>
-</video>
-
-</section>
-
-<section id="timeline">
-
-</section>
-
-</main>
-
-<script
-type="module"
-src="js/app.js">
-</script>
+    <script
+        type="module"
+        src="js/app.js">
+    </script>
 
 </body>
 
