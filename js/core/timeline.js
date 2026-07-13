@@ -1,143 +1,324 @@
-const Timeline={
+import Clips from "./clips.js";
+import Player from "./player.js";
 
-canvas:null,
-ctx:null,
+const Timeline = {
 
-duration:0,
+    canvas: null,
 
-zoom:100,
+    ctx: null,
 
-width:1000,
+    duration: 0,
 
-init(){
+    zoom: 100,
 
-    this.canvas=document.getElementById("timelineCanvas");
+    width: 1000,
 
-    this.ctx=this.canvas.getContext("2d");
+    trackY: 45,
 
-    this.canvas.width=this.width;
+    trackHeight: 30,
 
-    this.canvas.height=120;
+    init() {
 
-    this.bind();
+        this.canvas = document.getElementById("timelineCanvas");
 
-    this.render();
+        this.ctx = this.canvas.getContext("2d");
 
-},
+        this.canvas.height = 120;
 
-bind(){
+        this.canvas.width = this.width;
 
-    document
-    .getElementById("zoomIn")
-    .onclick=()=>{
+        this.bind();
 
-        this.zoom+=20;
+        this.render();
+
+    },
+
+    bind() {
+
+        const zoomIn = document.getElementById("zoomIn");
+
+        const zoomOut = document.getElementById("zoomOut");
+
+        if (zoomIn) {
+
+            zoomIn.onclick = () => {
+
+                this.zoom += 20;
+
+                this.update();
+
+            };
+
+        }
+
+        if (zoomOut) {
+
+            zoomOut.onclick = () => {
+
+                this.zoom = Math.max(20, this.zoom - 20);
+
+                this.update();
+
+            };
+
+        }
+
+        this.canvas.addEventListener("click", (e) => {
+
+            if (!this.duration) return;
+
+            const rect = this.canvas.getBoundingClientRect();
+
+            const x = e.clientX - rect.left;
+
+            const y = e.clientY - rect.top;
+
+            // =========================
+            // Cek apakah klik clip
+            // =========================
+
+            let found = false;
+
+            Clips.items.forEach((clip) => {
+
+                const clipX = (clip.start / this.duration) * this.canvas.width;
+
+                const clipW = ((clip.end - clip.start) / this.duration) * this.canvas.width;
+
+                if (
+
+                    x >= clipX &&
+                    x <= clipX + clipW &&
+                    y >= this.trackY &&
+                    y <= this.trackY + this.trackHeight
+
+                ) {
+
+                    Clips.selected = clip.id;
+
+                    found = true;
+
+                }
+
+            });
+
+            if (!found) {
+
+                Clips.selected = null;
+
+                const time = (x / this.canvas.width) * this.duration;
+
+                Player.seek(time);
+
+            }
+
+            this.render();
+
+        });
+
+    },
+
+    setDuration(duration) {
+
+        this.duration = duration;
 
         this.update();
 
-    };
+    },
 
-    document
-    .getElementById("zoomOut")
-    .onclick=()=>{
+    update() {
 
-        this.zoom=Math.max(20,this.zoom-20);
+        const label = document.getElementById("zoomLabel");
 
-        this.update();
+        if (label) {
 
-    };
+            label.textContent = this.zoom + "%";
 
-},
+        }
 
-setDuration(seconds){
+        this.width = Math.max(
 
-    this.duration=seconds;
+            1000,
 
-    this.update();
+            this.duration * 50 * (this.zoom / 100)
 
-},
+        );
 
-update(){
+        this.canvas.width = this.width;
 
-    document
-    .getElementById("zoomLabel")
-    .textContent=this.zoom+"%";
+        this.render();
 
-    this.width=Math.max(
-        1000,
-        this.duration*50*(this.zoom/100)
-    );
+    },
 
-    this.canvas.width=this.width;
+    render() {
 
-    this.render();
+        const ctx = this.ctx;
 
-},
+        ctx.clearRect(
 
-render(){
+            0,
 
-    const ctx=this.ctx;
+            0,
 
-    ctx.clearRect(
-        0,
-        0,
-        this.canvas.width,
-        this.canvas.height
-    );
+            this.canvas.width,
 
-    ctx.fillStyle="#333";
+            this.canvas.height
 
-    ctx.fillRect(
-        0,
-        40,
-        this.canvas.width,
-        40
-    );
+        );
 
-    ctx.strokeStyle="#666";
+        // Background Track
 
-    ctx.fillStyle="white";
+        ctx.fillStyle = "#2b2b2b";
 
-    if(this.duration<=0) return;
+        ctx.fillRect(
 
-    const px=this.canvas.width/this.duration;
+            0,
 
-    for(let i=0;i<=this.duration;i++){
+            this.trackY,
 
-        let x=i*px;
+            this.canvas.width,
 
-        ctx.beginPath();
+            this.trackHeight
 
-        ctx.moveTo(x,0);
+        );
 
-        ctx.lineTo(x,30);
+        if (!this.duration) return;
 
-        ctx.stroke();
+        // ==========================
+        // Time Ruler
+        // ==========================
 
-        ctx.fillText(
-            this.format(i),
-            x+2,
-            15
-           import Clips from "./clips.js"; 
+        const px = this.canvas.width / this.duration;
+
+        ctx.strokeStyle = "#555";
+
+        ctx.fillStyle = "#ffffff";
+
+        ctx.font = "11px Arial";
+
+        for (let i = 0; i <= this.duration; i++) {
+
+            const x = i * px;
+
+            ctx.beginPath();
+
+            ctx.moveTo(x, 0);
+
+            ctx.lineTo(x, 20);
+
+            ctx.stroke();
+
+            ctx.fillText(
+
+                this.format(i),
+
+                x + 2,
+
+                15
+
+            );
+
+        }
+
+        // ==========================
+        // Render Clips
+        // ==========================
+
+        Clips.items.forEach((clip, index) => {
+
+            const x =
+
+                (clip.start / this.duration)
+
+                * this.canvas.width;
+
+            const width =
+
+                ((clip.end - clip.start)
+
+                / this.duration)
+
+                * this.canvas.width;
+
+            if (clip.id === Clips.selected) {
+
+                ctx.fillStyle = "#ff9800";
+
+            } else {
+
+                ctx.fillStyle =
+
+                    index % 2
+
+                    ? "#4CAF50"
+
+                    : "#2196F3";
+
+            }
+
+            ctx.fillRect(
+
+                x,
+
+                this.trackY,
+
+                width,
+
+                this.trackHeight
+
+            );
+
+            ctx.strokeStyle = "#111";
+
+            ctx.strokeRect(
+
+                x,
+
+                this.trackY,
+
+                width,
+
+                this.trackHeight
+
+            );
+
+            ctx.fillStyle = "#ffffff";
+
+            ctx.font = "12px Arial";
+
+            ctx.fillText(
+
+                "Clip " + (index + 1),
+
+                x + 8,
+
+                this.trackY + 19
+
+            );
+
+        });
+
+    },
+
+    format(sec) {
+
+        sec = Math.floor(sec);
+
+        const m = Math.floor(sec / 60);
+
+        const s = sec % 60;
+
+        return (
+
+            String(m).padStart(2, "0") +
+
+            ":" +
+
+            String(s).padStart(2, "0")
+
         );
 
     }
-
-},
-
-format(sec){
-
-    sec=Math.floor(sec);
-
-    let m=Math.floor(sec/60);
-
-    let s=sec%60;
-
-    return String(m).padStart(2,"0")
-    +":"
-    +String(s).padStart(2,"0");
-
-}
 
 };
 
