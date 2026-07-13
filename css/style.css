@@ -60,9 +60,9 @@ body{
 
     object-fit:contain;
 
-    user-select:none;
+    display:block;
 
-    margin-bottom:30px;
+    margin:0 auto 30px;
 
 }
 
