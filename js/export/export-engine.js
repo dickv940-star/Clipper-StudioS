@@ -1,7 +1,7 @@
 /*
 =========================================
 ClipperStudio
-Export Engine
+Export Manager
 Version : 1.0
 
 Video Export Controller
@@ -10,16 +10,25 @@ Video Export Controller
 */
 
 
-const ExportEngine = {
+const ExportManager = {
 
 
-    project:null,
+    format:"mp4",
 
 
-    settings:{},
+    quality:"1080p",
+
+
+    fps:30,
 
 
     status:"idle",
+
+
+    progress:0,
+
+
+    output:null,
 
 
     callbacks:{},
@@ -31,75 +40,16 @@ const ExportEngine = {
     init(){
 
 
-        this.project=null;
-
-
-        this.settings={
-
-
-            format:
-            "mp4",
-
-
-
-            ratio:
-            "16:9",
-
-
-
-            width:
-            1920,
-
-
-
-            height:
-            1080,
-
-
-
-            fps:
-            30,
-
-
-
-            quality:
-            "high"
-
-
-
-        };
-
-
-
-        this.status="idle";
-
-
-
         console.log(
-            "Export Engine Ready"
+
+            "Export Manager Ready"
+
         );
 
 
     },
 
 
-
-
-
-
-
-    setProject(
-        project
-    ){
-
-
-
-        this.project =
-            project;
-
-
-
-    },
 
 
 
@@ -108,25 +58,36 @@ const ExportEngine = {
 
 
     configure(
-        options={}
+        settings={}
     ){
 
 
 
-        Object.assign(
+        this.format =
 
-            this.settings,
+        settings.format ||
 
-            options
-
-        );
+        "mp4";
 
 
 
-        this.emit(
-            "config",
-            this.settings
-        );
+
+
+        this.quality =
+
+        settings.quality ||
+
+        "1080p";
+
+
+
+
+
+        this.fps =
+
+        settings.fps ||
+
+        30;
 
 
 
@@ -138,109 +99,84 @@ const ExportEngine = {
 
 
 
-    setPlatform(
-        platform
+
+
+    async start(
+        project
     ){
 
 
 
-        const presets={
+        if(
+            !project
+        ){
+
+
+            console.error(
+
+                "Tidak ada project"
+
+            );
+
+
+            return;
+
+
+        }
 
 
 
-            youtube:{
-
-
-                ratio:
-                "16:9",
-
-
-                width:
-                1920,
-
-
-                height:
-                1080
 
 
 
-            },
+        this.status =
+            "preparing";
 
 
 
-            tiktok:{
 
 
-                ratio:
-                "9:16",
-
-
-                width:
-                1080,
-
-
-                height:
-                1920
+        this.progress=0;
 
 
 
-            },
+
+
+        this.emit(
+
+            "start"
+
+        );
 
 
 
-            shorts:{
-
-
-                ratio:
-                "9:16",
-
-
-                width:
-                1080,
-
-
-                height:
-                1920
 
 
 
-            },
 
 
 
-            reels:{
-
-
-                ratio:
-                "9:16",
-
-
-                width:
-                1080,
-
-
-                height:
-                1920
+        try{
 
 
 
-            },
+
+
+            if(
+                window.RenderPipeline
+            ){
 
 
 
-            square:{
+                RenderPipeline.loadProject(
+
+                    project
+
+                );
 
 
-                ratio:
-                "1:1",
 
-
-                width:
-                1080,
-
-
-                height:
-                1080
+                RenderPipeline.prepare();
 
 
 
@@ -248,20 +184,109 @@ const ExportEngine = {
 
 
 
-        };
 
 
 
 
 
-        if(
-            presets[platform]
-        ){
+            this.status =
+                "rendering";
 
 
-            this.configure(
 
-                presets[platform]
+
+
+            const frames =
+
+            await RenderPipeline.render();
+
+
+
+
+
+
+
+
+
+            this.status =
+                "encoding";
+
+
+
+
+
+            const video =
+
+            await this.encode(
+
+                frames
+
+            );
+
+
+
+
+
+
+
+
+
+            this.output = video;
+
+
+
+
+
+            this.status =
+                "complete";
+
+
+
+
+
+            this.emit(
+
+                "complete",
+
+                video
+
+            );
+
+
+
+
+
+            return video;
+
+
+
+
+
+
+        }
+
+        catch(error){
+
+
+
+            this.status =
+                "error";
+
+
+
+            console.error(
+
+                error
+
+            );
+
+
+
+            this.emit(
+
+                "error",
+
+                error
 
             );
 
@@ -278,103 +303,75 @@ const ExportEngine = {
 
 
 
-    collectData(){
+
+
+    async encode(
+        frames
+    ){
+
+
+
+        console.log(
+
+            "Encoding video..."
+
+        );
+
+
+
+
+
+        if(
+            window.Encoder
+        ){
+
+
+
+            return await Encoder.encode(
+
+                frames,
+
+                {
+
+                    format:this.format,
+
+                    fps:this.fps,
+
+                    quality:this.quality
+
+
+                }
+
+
+            );
+
+
+
+        }
+
+
+
+
 
 
 
         return {
 
 
-            project:
-            this.project,
+            type:
+
+            "video/mock",
 
 
 
-            settings:
-            this.settings,
-
-
-
-            timeline:
-
-            window.Timeline
-
-            ?
-
-            Timeline.export()
-
-            :
-
-            null,
-
-
-
-            subtitles:
-
-            window.SubtitleManager
-
-            ?
-
-            SubtitleManager.export()
-
-            :
-
-            [],
-
-
-
-            audio:
-
-
-            {
-
-                music:
-
-                window.MusicManager
-
-                ?
-
-                MusicManager.getTimelineData()
-
-                :
-
-                [],
-
-
-
-                voice:
-
-                window.VoiceOver
-
-                ?
-
-                VoiceOver.tracks
-
-                :
-
-                [],
-
-
-
-                effects:
-
-                window.SoundEffect
-
-                ?
-
-                SoundEffect.getTimelineData()
-
-                :
-
-                []
-
-            }
+            frames
 
 
 
         };
 
 
+
     },
 
 
@@ -383,53 +380,47 @@ const ExportEngine = {
 
 
 
-    async start(){
+
+
+    setProgress(
+        value
+    ){
 
 
 
-        this.status =
-            "processing";
+        this.progress =
+
+        Math.min(
+
+            1,
+
+            Math.max(
+
+                0,
+
+                value
+
+            )
+
+        );
 
 
-
-        const data =
-            this.collectData();
 
 
 
         this.emit(
 
-            "start",
+            "progress",
 
-            data
-
-        );
-
-
-
-
-
-        /*
-        Renderer belum aktif.
-        Nantinya masuk:
-        FFmpeg WASM
-        */
-
-
-        console.log(
-
-            "Export Data",
-
-            data
+            this.progress
 
         );
 
-
-
-        return data;
 
 
     },
+
+
 
 
 
@@ -446,12 +437,92 @@ const ExportEngine = {
 
 
 
+
+
         this.emit(
+
             "cancel"
+
         );
 
 
+
     },
+
+
+
+
+
+
+
+
+
+    download(){
+
+
+
+        if(
+            !this.output
+        )
+            return;
+
+
+
+
+
+        const url =
+
+        URL.createObjectURL(
+
+            this.output
+
+        );
+
+
+
+
+
+        const a =
+
+        document.createElement(
+
+            "a"
+
+        );
+
+
+
+
+
+        a.href=url;
+
+
+
+        a.download=
+
+        `ClipperStudio-export.${this.format}`;
+
+
+
+
+
+        a.click();
+
+
+
+
+
+        URL.revokeObjectURL(
+
+            url
+
+        );
+
+
+
+    },
+
+
 
 
 
@@ -463,11 +534,19 @@ const ExportEngine = {
 
 
 
-        this.status =
-            "idle";
+        this.output=null;
+
+
+        this.progress=0;
+
+
+        this.status="idle";
+
 
 
     },
+
+
 
 
 
@@ -478,10 +557,23 @@ const ExportEngine = {
     getStatus(){
 
 
-        return this.status;
+
+        return {
+
+
+            status:this.status,
+
+
+            progress:this.progress
+
+
+        };
+
 
 
     },
+
+
 
 
 
@@ -509,6 +601,8 @@ const ExportEngine = {
 
 
 
+
+
     emit(
         event,
         data
@@ -522,15 +616,17 @@ const ExportEngine = {
 
 
             this.callbacks[event](
+
                 data
+
             );
 
 
         }
 
 
-    }
 
+    }
 
 
 
@@ -538,5 +634,5 @@ const ExportEngine = {
 
 
 
-window.ExportEngine =
-    ExportEngine;
+window.ExportManager =
+    ExportManager;
