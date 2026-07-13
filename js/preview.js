@@ -1,93 +1,80 @@
 /*
-=========================================
+================================================
+
 ClipperStudio
-Preview Engine
-Version : 1.0
+Preview Controller
 
-Editor Video Preview Controller
+Version : 3.2
 
-=========================================
+Video Preview Manager
+
+================================================
 */
+
+
+(function(){
+
+"use strict";
+
+
+
+if(window.Preview){
+
+    console.warn(
+        "Preview already loaded"
+    );
+
+    return;
+
+}
+
+
+
 
 
 const Preview = {
 
 
-    container:null,
-
 
     video:null,
 
 
-    overlays:[],
+    canvas:null,
 
 
-    currentTime:0,
+    ctx:null,
 
 
-    callbacks:{},
+    currentClip:null,
 
 
-
-
-
-    init(containerId){
+    initialized:false,
 
 
 
-        this.container =
-            document.getElementById(
-                containerId
-            );
+
+
+    init(){
 
 
 
-        if(!this.container){
-
-
-            console.error(
-                "Preview container tidak ditemukan"
-            );
-
+        if(this.initialized){
 
             return;
-
 
         }
 
 
 
-
-        this.video =
-            document.createElement(
-                "video"
-            );
+        this.createElements();
 
 
 
-        this.video.playsInline=true;
-
-
-        this.video.controls=false;
-
-
-        this.video.preload="auto";
+        this.bindEvents();
 
 
 
-        this.video.style.width =
-            "100%";
-
-
-
-        this.video.style.height =
-            "100%";
-
-
-
-        this.container.appendChild(
-            this.video
-        );
+        this.initialized=true;
 
 
 
@@ -97,10 +84,141 @@ const Preview = {
 
 
 
-        this.bind();
+    },
+
+
+
+
+
+
+
+
+
+    createElements(){
+
+
+
+        this.video =
+
+        document.createElement(
+            "video"
+        );
+
+
+
+        this.video.controls=false;
+
+
+        this.video.playsInline=true;
+
+
+        this.video.preload="auto";
+
+
+
+        this.video.style.display="none";
+
+
+
+
+
+        this.canvas =
+
+        document.createElement(
+            "canvas"
+        );
+
+
+
+        this.canvas.width=1080;
+
+
+        this.canvas.height=1920;
+
+
+
+        this.ctx =
+
+        this.canvas.getContext(
+            "2d"
+        );
+
+
+
+
+
+
+        const container =
+
+        document.getElementById(
+            "page"
+        );
+
+
+
+
+
+        if(container){
+
+
+            container.appendChild(
+                this.canvas
+            );
+
+
+            container.appendChild(
+                this.video
+            );
+
+
+        }
+
 
 
     },
+
+
+
+
+
+
+
+
+
+    bindEvents(){
+
+
+
+        this.video.ontimeupdate=()=>{
+
+
+
+            if(
+                window.Playhead
+            ){
+
+
+                Playhead.set(
+
+                    this.video.currentTime
+
+                );
+
+
+            }
+
+
+
+            this.render();
+
+
+
+        };
+
+
+
+    },
+
 
 
 
@@ -110,18 +228,30 @@ const Preview = {
 
 
     load(
-        videoData
+        clip
     ){
 
 
 
-        if(!this.video)
+        if(!clip){
+
             return;
 
+        }
 
 
-        this.video.src =
-            videoData.url;
+
+
+
+        this.currentClip=clip;
+
+
+
+        this.video.src=
+
+        clip.source;
+
+
 
 
 
@@ -129,7 +259,21 @@ const Preview = {
 
 
 
+
+
+        console.log(
+
+            "Preview Load:",
+
+            clip
+
+        );
+
+
+
     },
+
+
 
 
 
@@ -140,10 +284,28 @@ const Preview = {
     play(){
 
 
+
+        if(!this.video.src){
+
+            console.warn(
+                "Tidak ada video"
+            );
+
+            return;
+
+        }
+
+
+
+
+
         this.video.play();
 
 
+
     },
+
+
 
 
 
@@ -154,10 +316,14 @@ const Preview = {
     pause(){
 
 
+
         this.video.pause();
 
 
+
     },
+
+
 
 
 
@@ -171,46 +337,11 @@ const Preview = {
 
 
 
-        this.video.currentTime =
-            time;
+        this.video.currentTime=time;
 
 
 
-    },
-
-
-
-
-
-
-
-    setVolume(
-        value
-    ){
-
-
-
-        this.video.volume =
-            value;
-
-
-
-    },
-
-
-
-
-
-
-
-    setSpeed(
-        speed
-    ){
-
-
-
-        this.video.playbackRate =
-            speed;
+        this.render();
 
 
 
@@ -223,252 +354,116 @@ const Preview = {
 
 
 
-    addOverlay(
-        element
-    ){
 
-
-
-        element.style.position =
-            "absolute";
-
-
-
-        this.container.appendChild(
-            element
-        );
-
-
-
-        this.overlays.push(
-            element
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-    removeOverlay(
-        element
-    ){
-
-
-
-        element.remove();
-
-
-
-        this.overlays =
-            this.overlays.filter(
-                item =>
-                item !== element
-            );
-
-
-    },
-
-
-
-
-
-
-
-
-    clearOverlay(){
-
-
-
-        this.overlays.forEach(
-            item =>
-            item.remove()
-        );
-
-
-
-        this.overlays=[];
-
-
-    },
-
-
-
-
-
-
-
-    applyCrop(
-        crop
-    ){
-
-
-
-        if(!crop)
-            return;
-
-
-
-        this.video.style.objectFit =
-            "cover";
-
-
-
-        this.video.style.objectPosition =
-
-
-            (
-
-                crop.x || 50
-
-            )
-
-            +
-
-            "% "
-
-            +
-
-            (
-
-                crop.y || 50
-
-            )
-
-            +
-
-            "%";
-
-
-
-    },
-
-
-
-
-
-
-
-    bind(){
-
-
-
-        this.video.addEventListener(
-
-            "timeupdate",
-
-            ()=>{
-
-
-                this.currentTime =
-                    this.video.currentTime;
-
-
-
-                this.emit(
-
-                    "timeupdate",
-
-                    this.currentTime
-
-                );
-
-
-            }
-
-        );
-
-
-
-
-
-        this.video.addEventListener(
-
-            "play",
-
-            ()=>{
-
-
-                this.emit(
-                    "play"
-                );
-
-
-            }
-
-        );
-
-
-
-
-
-        this.video.addEventListener(
-
-            "pause",
-
-            ()=>{
-
-
-                this.emit(
-                    "pause"
-                );
-
-
-            }
-
-        );
-
-
-
-    },
-
-
-
-
-
-
-
-    on(
-        event,
-        callback
-    ){
-
-
-
-        this.callbacks[event]=
-            callback;
-
-
-
-    },
-
-
-
-
-
-
-
-    emit(
-        event,
-        data
-    ){
+    render(){
 
 
 
         if(
-            this.callbacks[event]
+            !this.video.videoWidth
         ){
 
-            this.callbacks[event](
-                data
-            );
-
+            return;
 
         }
+
+
+
+
+
+        this.ctx.clearRect(
+
+            0,
+
+            0,
+
+            this.canvas.width,
+
+            this.canvas.height
+
+        );
+
+
+
+
+
+        const ratio =
+
+        Math.min(
+
+            this.canvas.width /
+
+            this.video.videoWidth,
+
+
+            this.canvas.height /
+
+            this.video.videoHeight
+
+        );
+
+
+
+
+
+        const width =
+
+        this.video.videoWidth *
+
+        ratio;
+
+
+
+        const height =
+
+        this.video.videoHeight *
+
+        ratio;
+
+
+
+
+
+        const x =
+
+        (
+
+            this.canvas.width -
+
+            width
+
+        ) / 2;
+
+
+
+        const y =
+
+        (
+
+            this.canvas.height -
+
+            height
+
+        ) / 2;
+
+
+
+
+
+
+        this.ctx.drawImage(
+
+            this.video,
+
+            x,
+
+            y,
+
+            width,
+
+            height
+
+        );
 
 
 
@@ -477,9 +472,25 @@ const Preview = {
 
 
 
+
+
 };
 
 
 
+
+
+
+
 window.Preview =
-    Preview;
+Preview;
+
+
+
+console.log(
+"Preview Controller Loaded"
+);
+
+
+
+})();
