@@ -1,68 +1,27 @@
 /*
-=========================================
+================================================
+
 ClipperStudio
-Main Application Controller
-Version : 1.0
-=========================================
+APP CORE
+
+Version : 3.0
+
+Application Bootstrap
+
+================================================
 */
-
-
-import "./loader.js";
-import "./metadata.js";
-import "./thumbnail.js";
-import "./player.js";
-
-import "./offline.js";
-import "./cache.js";
-import "./install.js";
-
-import "./ffmpeg.js";
-import "./export.js";
-
-
-/* AI */
-
-import "./ai/scene-detector.js";
-import "./ai/motion-detector.js";
-import "./ai/face-detector.js";
-import "./ai/subtitle-engine.js";
-import "./ai/highlight-engine.js";
-import "./ai/autoframe.js";
-import "./ai/ranking.js";
-import "./ai/smart-cut.js";
-import "./ai/clip-generator.js";
-
-
-/* Editor */
-
-import "./editor/timeline.js";
-import "./editor/track.js";
-import "./editor/clip.js";
-
-
-/* Storage */
-
-import "./storage/project-storage.js";
-
-
-
 
 
 const App = {
 
 
-
-    video:null,
-
-
-    file:null,
+    version:"3.0",
 
 
-    project:null,
+    ready:false,
 
 
-
-    screens:{},
+    modules:{},
 
 
 
@@ -72,32 +31,41 @@ const App = {
 
 
 
-        console.log(
-            "ClipperStudio Starting..."
-        );
-
-
-
-        this.cacheScreens();
-
-
-
-        this.bindUpload();
-
-
-
-        this.bindButtons();
-
-
-
-
-        await this.initializeSystems();
-
+        console.clear();
 
 
 
         console.log(
-            "ClipperStudio Ready"
+
+            "%cClipperStudio Starting...",
+
+            "color:#6c5ce7;font-size:18px"
+
+        );
+
+
+
+
+
+        this.checkModules();
+
+
+
+        await this.initialize();
+
+
+
+        this.ready=true;
+
+
+
+
+        console.log(
+
+            "%cClipperStudio Ready",
+
+            "color:#00b894;font-size:18px"
+
         );
 
 
@@ -112,620 +80,556 @@ const App = {
 
 
 
-    async initializeSystems(){
+    checkModules(){
 
 
 
-        try{
+        const list=[
 
 
 
-            OfflineManager.init();
+            // STORAGE
 
+            "ProjectStorage",
 
 
-            CacheManager.init();
 
+            // VIDEO
 
+            "VideoLoader",
 
-            InstallManager.init();
 
+            "Metadata",
 
 
-            await ProjectStorage.init();
+            "Thumbnail",
 
 
+            "Player",
 
-            ClipGenerator.init();
 
 
 
-            SmartCut.init();
 
+            // AI
 
+            "SceneDetector",
 
-            RankingEngine.init();
 
+            "MotionDetector",
 
 
+            "FaceDetector",
 
-        }
 
-        catch(error){
+            "SubtitleEngine",
 
 
-            console.error(
+            "HighlightEngine",
 
-                "System Init Error",
 
-                error
+            "AutoFrame",
 
-            );
 
+            "ClipGenerator",
 
-        }
 
+            "AutoEditor",
 
 
-    },
 
 
 
+            // EDITOR
 
+            "Timeline",
 
 
+            "Track",
 
 
+            "Clip",
 
-    cacheScreens(){
 
+            "Marker",
 
 
-        this.screens={
+            "Playhead",
 
 
-            home:
+            "Undo",
 
-            document.getElementById(
-                "homeScreen"
-            ),
 
+            "Redo",
 
 
-            mode:
 
-            document.getElementById(
-                "modeScreen"
-            ),
 
 
+            // AUDIO
 
-            auto:
+            "AudioEngine",
 
-            document.getElementById(
-                "autoClipScreen"
-            )
 
+            "MusicManager",
 
-        };
 
+            "VoiceOver",
 
 
-    },
+            "SoundEffect",
 
 
 
 
 
+            // EFFECT
 
+            "EffectEngine",
 
 
 
-    showScreen(
-        name
-    ){
 
 
+            // RENDER
 
-        Object.values(
-            this.screens
-        )
-        .forEach(
+            "RenderEngine",
 
-            screen=>{
 
+            "PreviewRenderer",
 
-                if(screen)
 
-                    screen.classList.remove(
-                        "active"
+            "FrameRenderer",
+
+
+            "MotionEngine",
+
+
+            "ColorEngine",
+
+
+            "LUTEngine",
+
+
+            "ShaderEngine",
+
+
+            "RenderCompositor",
+
+
+            "RenderPipeline",
+
+
+
+
+
+            // EXPORT
+
+            "QualityManager",
+
+
+            "ExportManager",
+
+
+            "ExportController",
+
+
+            "RenderPreview"
+
+
+
+
+        ];
+
+
+
+
+
+        list.forEach(
+
+            module=>{
+
+
+
+                this.modules[module]=
+
+                Boolean(
+
+                    window[module]
+
+                );
+
+
+
+                if(
+                    window[module]
+                ){
+
+
+                    console.log(
+
+                        "✓",
+
+                        module
+
                     );
+
+
+                }
+                else{
+
+
+                    console.warn(
+
+                        "○",
+
+                        module,
+
+                        "belum tersedia"
+
+                    );
+
+
+                }
+
 
 
             }
 
+
         );
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    async initialize(){
+
+
+
+        console.log(
+
+            "Initializing systems..."
+
+        );
+
+
+
+
+
+        /*
+        ===========================
+        STORAGE
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "ProjectStorage"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        VIDEO
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "Player"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        AI
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "SceneDetector"
+
+        );
+
+
+        this.initModule(
+
+            "MotionDetector"
+
+        );
+
+
+        this.initModule(
+
+            "FaceDetector"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        EDITOR
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "Timeline"
+
+        );
+
+
+        this.initModule(
+
+            "Undo"
+
+        );
+
+
+        this.initModule(
+
+            "Redo"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        AUDIO
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "AudioEngine"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        EFFECT
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "EffectEngine"
+
+        );
+
+
+
+
+
+
+        /*
+        ===========================
+        RENDER
+        ===========================
+        */
+
+
+        this.initModule(
+
+            "RenderEngine"
+
+        );
+
+
+        this.initModule(
+
+            "MotionEngine"
+
+        );
+
+
+        this.initModule(
+
+            "ColorEngine"
+
+        );
+
+
+        this.initModule(
+
+            "LUTEngine"
+
+        );
+
+
+        this.initModule(
+
+            "ShaderEngine"
+
+        );
+
+
 
 
 
 
         if(
-            this.screens[name]
+            window.RenderPipeline
         ){
 
 
 
-            this.screens[name]
+            RenderPipeline.init({
 
-            .classList.add(
-                "active"
-            );
+                fps:30,
 
+                width:1080,
 
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    bindUpload(){
-
-
-
-        const input =
-
-        document.getElementById(
-            "videoInput"
-        );
-
-
-
-        const button =
-
-        document.getElementById(
-            "chooseFile"
-        );
-
-
-
-
-        if(!input || !button)
-            return;
-
-
-
-
-
-        button.onclick=()=>{
-
-
-            input.click();
-
-
-
-        };
-
-
-
-
-
-
-
-        input.onchange=
-
-        async(e)=>{
-
-
-
-            const file =
-            e.target.files[0];
-
-
-
-            if(!file)
-                return;
-
-
-
-
-            console.log(
-
-                "Video dipilih",
-
-                file
-
-            );
-
-
-
-            this.file=file;
-
-
-
-            await this.loadVideo(
-                file
-            );
-
-
-
-        };
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async loadVideo(
-        file
-    ){
-
-
-
-        try{
-
-
-
-            this.showScreen(
-                "mode"
-            );
-
-
-
-
-
-            this.project =
-
-            ProjectStorage.create(
-
-                file.name
-
-            );
-
-
-
-
-
-            this.project.video={
-
-
-                name:file.name,
-
-
-                size:file.size,
-
-
-                type:file.type
-
-
-
-            };
-
-
-
-
-
-            await ProjectStorage.save(
-
-                this.project
-
-            );
-
-
-
-
-
-            CacheManager.saveVideoMeta({
-
-                name:file.name,
-
-                size:file.size,
-
-                type:file.type
+                height:1920
 
 
             });
 
 
-
-
-
-            console.log(
-
-                "Video berhasil dimuat"
-
-            );
-
-
-
-        }
-
-
-        catch(error){
-
-
-
-            console.error(
-
-                "Load video error",
-
-                error
-
-            );
-
-
-        }
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    bindButtons(){
-
-
-
-        const auto =
-
-        document.getElementById(
-
-            "autoClipBtn"
-
-        );
-
-
-
-
-        if(auto){
-
-
-
-            auto.onclick=()=>{
-
-
-                this.showScreen(
-                    "auto"
-                );
-
-
-            };
-
-
         }
 
 
 
 
 
-
-        const manual =
-
-        document.getElementById(
-
-            "manualBtn"
-
-        );
-
-
-
-        if(manual){
-
-
-
-            manual.onclick=()=>{
-
-
-                console.log(
-
-                    "Open Manual Editor"
-
-                );
-
-
-
-            };
-
-
-        }
-
-
-
-
-
-        const startAuto =
-
-        document.getElementById(
-
-            "startAutoClip"
-
-        );
-
-
-
-
-        if(startAuto){
-
-
-
-            startAuto.onclick=
-
-            ()=>{
-
-
-                this.startAutoClip();
-
-
-            };
-
-
-
-        }
-
-
-
-
-    },
-
-
-
-
-
-
-
-
-
-    async startAutoClip(){
-
-
-
-        console.log(
-
-            "AI Auto Clip Started"
-
-        );
-
-
-
-
-        this.showProcessing();
 
 
 
         /*
-
-        Pipeline:
-
-        Video
-        |
-        Scene
-        |
-        Motion
-        |
-        Face
-        |
-        Highlight
-        |
-        Ranking
-        |
-        Smart Cut
-        |
-        Clip Generator
-
+        ===========================
+        EXPORT
+        ===========================
         */
 
 
+        this.initModule(
+
+            "QualityManager"
+
+        );
 
 
+        this.initModule(
 
-        try{
+            "ExportManager"
 
-
-
-            const result = {
-
-
-                video:
-                this.file,
+        );
 
 
+        this.initModule(
 
-                scenes:[],
+            "ExportController"
 
-
-                motions:[],
-
-
-                faces:[],
-
-
-                highlights:[]
-
-
-            };
+        );
 
 
 
 
 
-            RankingEngine.rank(
-
-                []
-
-            );
-
-
-
-
-            const clips =
-
-            ClipGenerator.generate(
-
-                []
-
-            );
-
-
-
-
-            this.project.clips =
-                clips;
-
-
-
-            await ProjectStorage.save(
-
-                this.project
-
-            );
+    },
 
 
 
 
 
-            console.log(
-
-                "AI Clip selesai",
-
-                clips
-
-            );
 
 
 
-        }
+
+    initModule(
+        name
+    ){
 
 
-        catch(error){
+
+        const module =
+
+        window[name];
 
 
 
-            console.error(
 
-                error
 
-            );
+        if(
+            module &&
+            typeof module.init==="function"
+        ){
+
+
+
+            try{
+
+
+                module.init();
+
+
+
+                console.log(
+
+                    name,
+
+                    "initialized"
+
+                );
+
+
+
+            }
+
+            catch(error){
+
+
+
+                console.error(
+
+                    name,
+
+                    error
+
+                );
+
+
+            }
+
 
 
         }
@@ -742,13 +646,45 @@ const App = {
 
 
 
-    showProcessing(){
+    getStatus(){
+
+
+
+        return {
+
+
+            ready:this.ready,
+
+
+            modules:this.modules
+
+
+
+        };
+
+
+
+    },
+
+
+
+
+
+
+
+
+
+    reset(){
+
+
+
+        this.ready=false;
 
 
 
         console.log(
 
-            "Processing AI..."
+            "ClipperStudio Reset"
 
         );
 
@@ -758,14 +694,20 @@ const App = {
 
 
 
+
 };
 
 
 
 
 
-window.App =
-    App;
+
+
+window.App = App;
+
+
+
+
 
 
 
@@ -779,4 +721,6 @@ document.addEventListener(
     App.init();
 
 
-});                                   
+}
+
+);
