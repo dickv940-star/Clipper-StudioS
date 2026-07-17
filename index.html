@@ -1,423 +1,173 @@
-<!DOCTYPE html>
-<html lang="id">
+/*
+=========================================
+Auto Frame Studio
+Export Engine
+Version 1.0
+=========================================
+*/
 
-<head>
+"use strict";
 
-<meta charset="UTF-8">
+const ExportVideo = {
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+    recorder: null,
+    stream: null,
+    chunks: [],
+    recording: false,
 
+    /*
+    =========================================
+    START RECORDING
+    =========================================
+    */
 
-<title>
-ClipperStudio AI Editor
-</title>
+    start(canvas, fps = 30) {
 
+        if (!canvas) {
 
-<link rel="manifest"
-href="manifest.json">
+            console.error("Canvas tidak ditemukan.");
 
+            return false;
 
-<link rel="icon"
-href="assets/icon-192.png">
+        }
 
+        this.chunks = [];
 
-<meta name="theme-color"
-content="#6c5ce7">
+        this.stream = canvas.captureStream(fps);
 
+        const options = {};
 
+        if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
 
-<style>
+            options.mimeType = "video/webm;codecs=vp9";
 
-*{
-box-sizing:border-box;
-}
+        }
+        else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
 
+            options.mimeType = "video/webm;codecs=vp8";
 
-html,
-body{
+        }
+        else {
 
-margin:0;
+            options.mimeType = "video/webm";
 
-width:100%;
+        }
 
-height:100%;
+        this.recorder = new MediaRecorder(
+            this.stream,
+            options
+        );
 
-background:#090d18;
+        this.recorder.ondataavailable = (event) => {
 
-color:white;
+            if (event.data && event.data.size > 0) {
 
-font-family:
+                this.chunks.push(event.data);
 
-Arial,
-sans-serif;
+            }
 
-overflow:hidden;
+        };
 
-}
+        this.recorder.onstart = () => {
 
+            console.log("Recording Started");
 
+        };
 
-#app{
+        this.recorder.onerror = (error) => {
 
-width:100%;
+            console.error(error);
 
-height:100%;
+        };
 
-display:flex;
+        this.recorder.start();
 
-flex-direction:column;
+        this.recording = true;
 
-}
+        return true;
 
+    },
 
+    /*
+    =========================================
+    STOP RECORDING
+    =========================================
+    */
 
-#page{
+    stop() {
 
-width:100%;
+        return new Promise((resolve) => {
 
-height:100%;
+            if (!this.recording || !this.recorder) {
 
-}
+                resolve(null);
 
+                return;
 
+            }
 
-button{
+            this.recorder.onstop = () => {
 
-cursor:pointer;
+                const blob = new Blob(
 
-}
+                    this.chunks,
 
+                    {
 
+                        type: "video/webm"
 
-canvas{
+                    }
 
-max-width:100%;
+                );
 
-}
+                this.recording = false;
 
+                resolve(blob);
 
-</style>
+            };
 
+            this.recorder.stop();
 
-</head>
+        });
 
+    },
 
-<body>
+    /*
+    =========================================
+    DOWNLOAD
+    =========================================
+    */
 
+    download(blob, filename = "AutoFrame.webm") {
 
-<div id="app">
+        if (!blob) {
 
+            alert("Video belum direkam.");
 
-<div id="page">
+            return;
 
-Loading ClipperStudio...
+        }
 
-</div>
+        const url = URL.createObjectURL(blob);
 
+        const link = document.createElement("a");
 
-</div>
+        link.href = url;
 
+        link.download = filename;
 
+        document.body.appendChild(link);
 
+        link.click();
 
+        document.body.removeChild(link);
 
-<!-- =========================
-CORE
-========================= -->
+        URL.revokeObjectURL(url);
 
+    }
 
-<script src="js/router.js"></script>
+};
 
+window.ExportVideo = ExportVideo;
 
-
-
-
-<!-- =========================
-STORAGE
-========================= -->
-
-
-<script src="js/project-storage.js"></script>
-  
-<script src="js/project-manager.js"></script>
-
-<script src="js/media-manager.js"></script>
-
-
-<!-- =========================
-VIDEO
-========================= -->
-
-
-<script src="js/loader.js"></script>
-
-<script src="js/player.js"></script>
-
-<script src="js/metadata.js"></script>
-
-<script src="js/thumbnail.js"></script>
-
-
-
-
-
-<!-- =========================
-AI ENGINE
-========================= -->
-
-
-<script src="js/scene-detector.js"></script>
-
-<script src="js/motion-detector.js"></script>
-
-<script src="js/face-detector.js"></script>
-
-<script src="js/subtitle-engine.js"></script>
-
-<script src="js/highlight-engine.js"></script>
-
-<script src="js/autoframe.js"></script>
-
-<script src="js/clip-generator.js"></script>
-
-<script src="js/auto-editor.js"></script>
-
-<script src="js/ranking.js"></script>
-
-<script src="js/smart-cut.js"></script>
-
-
-
-
-
-<!-- =========================
-EDITOR
-========================= -->
-
-
-<script src="js/timeline.js"></script>
-
-<script src="js/track.js"></script>
-
-<script src="js/clip.js"></script>
-
-<script src="js/marker.js"></script>
-
-<script src="js/playhead.js"></script>
-
-<script src="js/toolbar.js"></script>
-
-<script src="js/trim.js"></script>
-
-<script src="js/split.js"></script>
-
-<script src="js/delete.js"></script>
-
-<script src="js/undo.js"></script>
-
-<script src="js/redo.js"></script>
-
-<script src="js/preview.js"></script>
-
-<script src="js/editor.js"></script>
-
-
-
-
-
-<!-- =========================
-AUDIO
-========================= -->
-
-
-<script src="js/audio-engine.js"></script>
-
-<script src="js/music-manager.js"></script>
-
-<script src="js/voice-over.js"></script>
-
-<script src="js/sound-effect.js"></script>
-
-
-
-
-
-<!-- =========================
-SUBTITLE
-========================= -->
-
-
-<script src="js/subtitle-manager.js"></script>
-
-<script src="js/subtitle-style.js"></script>
-
-<script src="js/subtitle-renderer.js"></script>
-
-
-
-
-
-<!-- =========================
-EFFECT
-========================= -->
-
-
-<script src="js/effect-engine.js"></script>
-
-
-
-
-
-<!-- =========================
-RENDER ENGINE
-========================= -->
-
-
-<script src="js/render-engine.js"></script>
-
-<script src="js/render-preview.js"></script>
-
-<script src="js/preview-renderer.js"></script>
-
-<script src="js/frame-renderer.js"></script>
-
-<script src="js/transition-renderer.js"></script>
-
-<script src="js/overlay-renderer.js"></script>
-
-<script src="js/render-compositor.js"></script>
-
-<script src="js/keyframe-engine.js"></script>
-
-<script src="js/motion-engine.js"></script>
-
-<script src="js/color-engine.js"></script>
-
-<script src="js/lut-engine.js"></script>
-
-<script src="js/shader-engine.js"></script>
-
-<script src="js/render-worker.js"></script>
-
-<script src="js/render-pipeline.js"></script>
-
-
-
-
-
-<!-- =========================
-EXPORT
-========================= -->
-
-
-<script src="js/format-manager.js"></script>
-
-<script src="js/ffmpeg.js"></script>
-
-<script src="js/encoder.js"></script>
-
-<script src="js/quality-manager.js"></script>
-
-<script src="js/render-queue.js"></script>
-
-<script src="js/export-manager.js"></script>
-
-<script src="js/export-controller.js"></script>
-
-<script src="js/export-engine.js"></script>
-
-
-
-
-
-<!-- =========================
-PWA SUPPORT
-========================= -->
-
-
-<script src="js/offline.js"></script>
-
-<script src="js/cache.js"></script>
-
-<script src="js/install.js"></script>
-
-
-
-
-
-<!-- =========================
-APPLICATION START
-========================= -->
-
-
-<script src="js/app.js"></script>
-
-
-
-
-
-<script>
-
-
-if(
-"serviceWorker" in navigator
-){
-
-
-window.addEventListener(
-
-"load",
-
-()=>{
-
-
-navigator.serviceWorker.register(
-
-"service-worker.js"
-
-)
-
-.then(()=>{
-
-
-console.log(
-"ClipperStudio PWA aktif"
-);
-
-
-})
-
-.catch(
-
-error=>{
-
-
-console.error(
-
-"Service Worker Error:",
-
-error
-
-);
-
-
-});
-
-
-}
-
-);
-
-
-}
-
-
-
-</script>
-
-
-
-</body>
-
-</html>
+console.log("Export Engine Loaded");
