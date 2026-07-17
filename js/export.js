@@ -1,173 +1,107 @@
 /*
-=========================================
+=========================================================
 Auto Frame Studio
 Export Engine
-Version 1.0
-=========================================
+Version 2.0
+=========================================================
 */
 
 "use strict";
 
-const ExportVideo = {
+const ExportEngine = {
 
-    recorder: null,
-    stream: null,
-    chunks: [],
-    recording: false,
+    exporting: false,
 
-    /*
-    =========================================
-    START RECORDING
-    =========================================
-    */
+    async export(video, canvas) {
 
-    start(canvas, fps = 30) {
-
-        if (!canvas) {
-
-            console.error("Canvas tidak ditemukan.");
-
-            return false;
-
-        }
-
-        this.chunks = [];
-
-        this.stream = canvas.captureStream(fps);
-
-        const options = {};
-
-        if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
-
-            options.mimeType = "video/webm;codecs=vp9";
-
-        }
-        else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
-
-            options.mimeType = "video/webm;codecs=vp8";
-
-        }
-        else {
-
-            options.mimeType = "video/webm";
-
-        }
-
-        this.recorder = new MediaRecorder(
-            this.stream,
-            options
-        );
-
-        this.recorder.ondataavailable = (event) => {
-
-            if (event.data && event.data.size > 0) {
-
-                this.chunks.push(event.data);
-
-            }
-
-        };
-
-        this.recorder.onstart = () => {
-
-            console.log("Recording Started");
-
-        };
-
-        this.recorder.onerror = (error) => {
-
-            console.error(error);
-
-        };
-
-        this.recorder.start();
-
-        this.recording = true;
-
-        return true;
-
-    },
-
-    /*
-    =========================================
-    STOP RECORDING
-    =========================================
-    */
-
-    stop() {
-
-        return new Promise((resolve) => {
-
-            if (!this.recording || !this.recorder) {
-
-                resolve(null);
-
-                return;
-
-            }
-
-            this.recorder.onstop = () => {
-
-                const blob = new Blob(
-
-                    this.chunks,
-
-                    {
-
-                        type: "video/webm"
-
-                    }
-
-                );
-
-                this.recording = false;
-
-                resolve(blob);
-
-            };
-
-            this.recorder.stop();
-
-        });
-
-    },
-
-    /*
-    =========================================
-    DOWNLOAD
-    =========================================
-    */
-
-    download(blob, filename = "AutoFrame.webm") {
-
-        if (!blob) {
-
-            alert("Video belum direkam.");
+        if (this.exporting) {
 
             return;
 
         }
 
-        const url = URL.createObjectURL(blob);
+        this.exporting = true;
 
-        const link = document.createElement("a");
+        console.log("================================");
+        console.log("EXPORT ENGINE");
+        console.log("================================");
 
-        link.href = url;
+        try {
 
-        link.download = filename;
+            /*
+            ================================
+            LOAD FFMPEG
+            ================================
+            */
 
-        document.body.appendChild(link);
+            await FFmpegEngine.load();
 
-        link.click();
+            /*
+            ================================
+            INIT RENDERER
+            ================================
+            */
 
-        document.body.removeChild(link);
+            Renderer.init(
 
-        URL.revokeObjectURL(url);
+                video,
+
+                canvas
+
+            );
+
+            Renderer.onProgress = (progress)=>{
+
+                console.log(
+
+                    progress.percent + "%",
+
+                    progress.frame,
+
+                    "/",
+
+                    progress.total
+
+                );
+
+            };
+
+            /*
+            ================================
+            START RENDER
+            ================================
+            */
+
+            await Renderer.render();
+
+            console.log("Render Finished");
+
+            /*
+            ================================
+            NEXT
+            ================================
+            */
+
+            alert(
+
+                "Render selesai.\n\nBagian berikutnya akan membuat MP4."
+
+            );
+
+        }
+
+        catch(error){
+
+            console.error(error);
+
+        }
+
+        this.exporting = false;
 
     }
 
 };
 
-window.ExportVideo = ExportVideo;
+window.ExportEngine = ExportEngine;
 
 console.log("Export Engine Loaded");
