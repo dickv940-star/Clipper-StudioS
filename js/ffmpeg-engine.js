@@ -5,27 +5,25 @@ const FFmpegEngine = {
     ffmpeg: null,
     loaded: false,
 
-    async load() {
+    async init() {
 
         if (this.loaded) {
             return;
         }
 
-        if (typeof FFmpeg === "undefined") {
-            throw new Error("FFmpeg belum dimuat.");
-        }
+        const { FFmpeg } = window;
 
-        const { createFFmpeg } = FFmpeg;
+        this.ffmpeg = new FFmpeg();
 
-        this.ffmpeg = createFFmpeg({
+        await this.ffmpeg.load({
 
-            log: true,
+            coreURL:
+                "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js",
 
-            corePath: "libs/ffmpeg/ffmpeg-core.js"
+            wasmURL:
+                "https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm"
 
         });
-
-        await this.ffmpeg.load();
 
         this.loaded = true;
 
