@@ -547,16 +547,16 @@ document.getElementById("autoFrameBtn").onclick = async () => {
         status.innerHTML = "Status : Memulai Auto Frame...";
 
         await AutoFrame.start(video);
-ExportVideo.start(document.getElementById("canvas"));
-        video.style.display = "none";
 
-        const canvas = document.getElementById("canvas");
+video.style.display = "none";
 
-        canvas.style.display = "block";
+const canvas = document.getElementById("canvas");
 
-        document.getElementById("exportBtn").disabled = false;
+canvas.style.display = "block";
 
-        status.innerHTML = "Status : Auto Frame aktif.";
+document.getElementById("exportBtn").disabled = false;
+
+status.innerHTML = "Status : Auto Frame aktif.";
 
     }
 
