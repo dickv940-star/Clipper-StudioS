@@ -2,7 +2,7 @@
 =========================================================
 Auto Frame Studio
 Renderer Engine
-Version 1.0
+Version 2.0
 =========================================================
 */
 
@@ -23,6 +23,16 @@ const Renderer = {
     currentFrame: 0,
 
     rendering: false,
+
+    recorder: null,
+
+    stream: null,
+
+    chunks: [],
+
+    recording: false,
+
+    webmBlob: null,
 
     onProgress: null,
 
@@ -50,6 +60,92 @@ const Renderer = {
 
         this.currentFrame = 0;
 
+        this.webmBlob = null;
+
+    },
+
+    /*
+    =========================================
+    START RECORDING
+    =========================================
+    */
+
+    startRecording() {
+
+        this.chunks = [];
+
+        this.stream = this.canvas.captureStream(this.fps);
+
+        this.recorder = new MediaRecorder(
+
+            this.stream,
+
+            {
+
+                mimeType: "video/webm"
+
+            }
+
+        );
+
+        this.recorder.ondataavailable = (event) => {
+
+            if (event.data.size > 0) {
+
+                this.chunks.push(event.data);
+
+            }
+
+        };
+
+        this.recorder.start();
+
+        this.recording = true;
+
+        console.log("Recording Started");
+
+    },
+
+    /*
+    =========================================
+    STOP RECORDING
+    =========================================
+    */
+
+    async stopRecording() {
+
+        if (!this.recording) {
+
+            return null;
+
+        }
+
+        return new Promise(resolve => {
+
+            this.recorder.onstop = () => {
+
+                this.webmBlob = new Blob(
+
+                    this.chunks,
+
+                    {
+
+                        type: "video/webm"
+
+                    }
+
+                );
+
+                resolve(this.webmBlob);
+
+            };
+
+            this.recorder.stop();
+
+            this.recording = false;
+
+        });
+
     },
 
     /*
@@ -62,13 +158,19 @@ const Renderer = {
 
         if (!this.video) {
 
-            throw new Error("Video belum dimuat.");
+            throw new Error(
+
+                "Video belum dimuat."
+
+            );
 
         }
 
         this.rendering = true;
 
         this.video.pause();
+
+        this.startRecording();
 
         while (
 
@@ -84,9 +186,15 @@ const Renderer = {
 
         this.rendering = false;
 
+        await this.stopRecording();
+
         if (this.onFinish) {
 
-            this.onFinish();
+            this.onFinish(
+
+                this.webmBlob
+
+            );
 
         }
 
@@ -122,10 +230,6 @@ const Renderer = {
 
             this.video.onseeked = () => {
 
-                /*
-                Gambar hasil Auto Frame
-                */
-
                 if (
 
                     window.AutoFrame &&
@@ -138,19 +242,19 @@ const Renderer = {
 
                 }
 
-                /*
-                Progress
-                */
-
                 this.currentFrame++;
 
                 if (this.onProgress) {
 
                     this.onProgress({
 
-                        frame: this.currentFrame,
+                        frame:
 
-                        total: this.totalFrames,
+                            this.currentFrame,
+
+                        total:
+
+                            this.totalFrames,
 
                         percent:
 
