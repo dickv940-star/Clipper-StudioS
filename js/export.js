@@ -16,7 +16,7 @@ const ExportEngine = {
 
         if (this.exporting) {
 
-            console.warn("Export sedang berjalan.");
+            alert("Export sedang berjalan.");
 
             return;
 
@@ -30,35 +30,19 @@ const ExportEngine = {
 
         try {
 
-            if (!video) {
-
-                throw new Error("Video belum dipilih.");
-
-            }
-
-            if (!canvas) {
-
-                throw new Error("Canvas tidak ditemukan.");
-
-            }
-
-            if (typeof Renderer === "undefined") {
-
-                throw new Error("Renderer belum dimuat.");
-
-            }
-
-            if (typeof FFmpegEngine === "undefined") {
-
-                throw new Error("FFmpeg Engine belum dimuat.");
-
-            }
-
-            console.log("Loading FFmpeg...");
+            /*
+            ========================================
+            LOAD FFMPEG
+            ========================================
+            */
 
             await FFmpegEngine.init();
 
-            console.log("FFmpeg Ready");
+            /*
+            ========================================
+            INIT RENDERER
+            ========================================
+            */
 
             Renderer.init(
 
@@ -68,11 +52,11 @@ const ExportEngine = {
 
             );
 
-            Renderer.onProgress = (progress)=>{
+            Renderer.onProgress = (progress) => {
 
                 console.log(
 
-                    "Render",
+                    "Render :",
 
                     progress.percent + "%",
 
@@ -88,9 +72,35 @@ const ExportEngine = {
 
                 );
 
+                const fill = document.getElementById("progressFill");
+
+                const text = document.getElementById("progressText");
+
+                if (fill) {
+
+                    fill.style.width = progress.percent + "%";
+
+                }
+
+                if (text) {
+
+                    text.innerHTML =
+
+                        "Rendering " +
+
+                        progress.percent +
+
+                        "%";
+
+                }
+
             };
 
-            console.log("Start Rendering...");
+            /*
+            ========================================
+            START RENDER
+            ========================================
+            */
 
             await Renderer.render();
 
@@ -98,41 +108,33 @@ const ExportEngine = {
 
             /*
             ========================================
-            NEXT STEP
-            ========================================
-
-            Frame PNG
-
-                    ↓
-
-            FFmpeg Encode
-
-                    ↓
-
-            MP4 Download
-
+            RENDER COMPLETE
             ========================================
             */
 
             alert(
 
-                "Rendering selesai.\n\nTahap berikutnya adalah Encoding MP4."
+                "Render selesai.\n\nTahap berikutnya adalah Encode MP4."
 
             );
 
         }
 
-        catch(error){
-
-            console.error("Export Error");
+        catch (error) {
 
             console.error(error);
 
-            alert(error.message);
+            alert(
+
+                "Export gagal.\n\n" +
+
+                error.message
+
+            );
 
         }
 
-        finally{
+        finally {
 
             this.exporting = false;
 
