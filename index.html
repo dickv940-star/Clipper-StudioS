@@ -569,18 +569,21 @@ ExportVideo.start(document.getElementById("canvas"));
 };
 document.getElementById("exportBtn").onclick = async () => {
 
-    status.innerHTML = "Status : Menyiapkan video...";
+    const video = document.getElementById("video");
 
-    const blob = await ExportVideo.stop();
+    const canvas = document.getElementById("canvas");
 
-    ExportVideo.download(
-        blob,
-        "AutoFrame.webm"
+    await ExportEngine.export(
+
+        video,
+
+        canvas
+
     );
 
-    status.innerHTML = "Status : Download selesai.";
-
 };
+
+
 </script>
 
 </body>
