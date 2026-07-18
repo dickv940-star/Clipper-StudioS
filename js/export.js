@@ -2,7 +2,7 @@
 =========================================================
 Auto Frame Studio
 Export Engine
-Version 2.0
+Version 3.0
 =========================================================
 */
 
@@ -16,6 +16,8 @@ const ExportEngine = {
 
         if (this.exporting) {
 
+            console.warn("Export sedang berjalan.");
+
             return;
 
         }
@@ -28,19 +30,35 @@ const ExportEngine = {
 
         try {
 
-            /*
-            ================================
-            LOAD FFMPEG
-            ================================
-            */
+            if (!video) {
 
-            await FFmpegEngine.load();
+                throw new Error("Video belum dipilih.");
 
-            /*
-            ================================
-            INIT RENDERER
-            ================================
-            */
+            }
+
+            if (!canvas) {
+
+                throw new Error("Canvas tidak ditemukan.");
+
+            }
+
+            if (typeof Renderer === "undefined") {
+
+                throw new Error("Renderer belum dimuat.");
+
+            }
+
+            if (typeof FFmpegEngine === "undefined") {
+
+                throw new Error("FFmpeg Engine belum dimuat.");
+
+            }
+
+            console.log("Loading FFmpeg...");
+
+            await FFmpegEngine.init();
+
+            console.log("FFmpeg Ready");
 
             Renderer.init(
 
@@ -54,37 +72,51 @@ const ExportEngine = {
 
                 console.log(
 
+                    "Render",
+
                     progress.percent + "%",
 
-                    progress.frame,
+                    "(" +
 
-                    "/",
+                    progress.frame +
 
-                    progress.total
+                    "/" +
+
+                    progress.total +
+
+                    ")"
 
                 );
 
             };
 
-            /*
-            ================================
-            START RENDER
-            ================================
-            */
+            console.log("Start Rendering...");
 
             await Renderer.render();
 
             console.log("Render Finished");
 
             /*
-            ================================
-            NEXT
-            ================================
+            ========================================
+            NEXT STEP
+            ========================================
+
+            Frame PNG
+
+                    ↓
+
+            FFmpeg Encode
+
+                    ↓
+
+            MP4 Download
+
+            ========================================
             */
 
             alert(
 
-                "Render selesai.\n\nBagian berikutnya akan membuat MP4."
+                "Rendering selesai.\n\nTahap berikutnya adalah Encoding MP4."
 
             );
 
@@ -92,11 +124,19 @@ const ExportEngine = {
 
         catch(error){
 
+            console.error("Export Error");
+
             console.error(error);
+
+            alert(error.message);
 
         }
 
-        this.exporting = false;
+        finally{
+
+            this.exporting = false;
+
+        }
 
     }
 
