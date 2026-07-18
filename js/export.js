@@ -15,108 +15,127 @@ const ExportEngine = {
     async export(video, canvas) {
 
         if (this.exporting) {
-
-            alert("Export sedang berjalan.");
-
             return;
-
         }
 
         this.exporting = true;
 
+        console.clear();
+
         console.log("================================");
-        console.log("EXPORT ENGINE");
+        console.log("AUTO FRAME EXPORT");
         console.log("================================");
 
         try {
 
             /*
-            ========================================
+            ==========================
             LOAD FFMPEG
-            ========================================
+            ==========================
             */
 
-            await FFmpegEngine.init();
+            if (!FFmpegEngine.loaded) {
+
+                console.log("Loading FFmpeg...");
+
+                await FFmpegEngine.init();
+
+            }
 
             /*
-            ========================================
+            ==========================
             INIT RENDERER
-            ========================================
+            ==========================
             */
 
-            Renderer.init(
-
-                video,
-
-                canvas
-
-            );
+            Renderer.init(video, canvas);
 
             Renderer.onProgress = (progress) => {
 
                 console.log(
 
-                    "Render :",
+                    "Rendering",
 
-                    progress.percent + "%",
-
-                    "(" +
-
-                    progress.frame +
-
-                    "/" +
-
-                    progress.total +
-
-                    ")"
+                    progress.percent + "%"
 
                 );
 
-                const fill = document.getElementById("progressFill");
+                const fill =
+                    document.getElementById("progressFill");
 
-                const text = document.getElementById("progressText");
+                const text =
+                    document.getElementById("progressText");
 
                 if (fill) {
 
-                    fill.style.width = progress.percent + "%";
+                    fill.style.width =
+                        progress.percent + "%";
 
                 }
 
                 if (text) {
 
                     text.innerHTML =
-
-                        "Rendering " +
-
-                        progress.percent +
-
-                        "%";
+                        progress.percent + "%";
 
                 }
 
             };
 
             /*
-            ========================================
+            ==========================
             START RENDER
-            ========================================
+            ==========================
             */
+
+            console.log("Start Rendering...");
 
             await Renderer.render();
 
-            console.log("Render Finished");
+            console.log("Renderer Finished");
 
             /*
-            ========================================
-            RENDER COMPLETE
-            ========================================
+            ==========================
+            ENCODE MP4
+            ==========================
             */
 
-            alert(
+            console.log("Encoding MP4...");
 
-                "Render selesai.\n\nTahap berikutnya adalah Encode MP4."
+            const mp4Blob =
+                await FFmpegEngine.encode(
 
-            );
+                    Renderer.webmBlob
+
+                );
+
+            /*
+            ==========================
+            DOWNLOAD
+            ==========================
+            */
+
+            const url =
+                URL.createObjectURL(mp4Blob);
+
+            const a =
+                document.createElement("a");
+
+            a.href = url;
+
+            a.download = "AutoFrame.mp4";
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            a.remove();
+
+            URL.revokeObjectURL(url);
+
+            console.log("Download Finished");
+
+            alert("Export MP4 selesai.");
 
         }
 
@@ -124,21 +143,11 @@ const ExportEngine = {
 
             console.error(error);
 
-            alert(
-
-                "Export gagal.\n\n" +
-
-                error.message
-
-            );
+            alert("Export gagal.");
 
         }
 
-        finally {
-
-            this.exporting = false;
-
-        }
+        this.exporting = false;
 
     }
 
